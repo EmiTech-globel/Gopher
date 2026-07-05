@@ -6,7 +6,7 @@
   "scripts": {
     "dev:mobile": "pnpm --filter mobile start",
     "dev:admin": "pnpm --filter admin dev",
-    "db:types": "echo \"run: supabase gen types typescript --linked > packages/shared-types/src/database.ts\""
+    "db:types": "supabase gen types typescript --linked > packages/shared-types/src/database.ts"
   },
   "license": "UNLICENSED",
   "devDependencies": {
