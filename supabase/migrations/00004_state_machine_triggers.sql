@@ -1,0 +1,9 @@
+-- FLAGGED FOR GUIDED WALKTHROUGH — not yet implemented.
+--
+-- RLS (00002) governs who can touch which rows, but not whether a status
+-- transition is *valid* — e.g. an errand can't go straight from 'open' to
+-- 'confirmed', and a new-tier scout's item-cost can't release before
+-- 'confirmed'. That logic belongs here, as a BEFORE UPDATE trigger on
+-- `errands` (and likely a second trigger on `transactions` for the
+-- release conditions). Revisit this file together when the build reaches
+-- the errand lifecycle implementation — see Section 20's closing note.
