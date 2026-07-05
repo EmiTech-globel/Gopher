@@ -8,5 +8,8 @@
     "dev:admin": "pnpm --filter admin dev",
     "db:types": "echo \"run: supabase gen types typescript --linked > packages/shared-types/src/database.ts\""
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "supabase": "^2.109.0"
+  }
 }
