@@ -61,3 +61,18 @@ pnpm dev:admin    # next dev
   model is decided (see spec Section on Charges Fee) but exact zones and
   coordinates are pending a walkthrough.
 - No emojis, anywhere, in any UI copy or code comments. Tabler Icons only.
+
+## Build Order — Screens (Shared, per spec Section 16)
+
+Screens must be built in this order since each depends on the one before:
+
+1. **Splash / loading screen** — brand mark, shown briefly on every app open.
+2. **Onboarding intro** (3-slide carousel) — first launch only, before login.
+3. **Login** — email/username + password.
+4. **Create account** — default User signup, with "Become a scout" link.
+5. **Scout registration** — matric number, department, live selfie/ID capture.
+6. **Verification pending / rejected** — scout-only states after registration.
+
+Everything after this point (Home, Post an errand, Browse errands, etc.)
+depends on knowing who's logged in and which role they're in, so auth
+and onboarding come first, before any role-specific screens.
