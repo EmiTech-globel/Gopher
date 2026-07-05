@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env.local
+*.log
+
+# Expo
+apps/mobile/.expo/
+apps/mobile/dist/
+
+# Next.js
+apps/admin/.next/
+apps/admin/out/
+
+# Build outputs
+packages/*/dist/
+
+# OS
+.DS_Store
+Thumbs.db
