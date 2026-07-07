@@ -1,11 +1,13 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "Gopher",
     "slug": "mobile",
     "version": "1.0.0",
+    "scheme": "gopher",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -20,6 +22,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": ["expo-router"]
   }
 }
