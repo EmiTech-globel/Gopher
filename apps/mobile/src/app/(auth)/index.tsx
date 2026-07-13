@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { colors, fonts } from "../../theme";
 
 const ONBOARDING_SEEN_KEY = "gopher.onboardingSeen";
 
@@ -23,6 +24,11 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../../../assets/gopher-logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.brand}>Gopher</Text>
     </View>
   );
@@ -31,14 +37,18 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#532B59",
+    backgroundColor: colors.surfaceBase,
     alignItems: "center",
     justifyContent: "center",
   },
+  logo: {
+    width: 56,
+    height: 56,
+    marginBottom: 20,
+  },
   brand: {
-    fontFamily: "Ubuntu",
-    fontSize: 40,
-    color: "#D7AEAD",
-    fontWeight: "700",
+    fontFamily: fonts.headingBold,
+    fontSize: 32,
+    color: colors.textPrimary,
   },
 });

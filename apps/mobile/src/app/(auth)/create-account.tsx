@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
 import {
@@ -9,6 +9,8 @@ import {
   ErrorText,
   EmailOtpStep,
 } from "../../components/auth";
+import { Pressable, Text } from "react-native";
+import { colors, fonts } from "../../theme";
 
 export default function CreateAccountScreen() {
   const [fullName, setFullName] = useState("");
@@ -85,28 +87,32 @@ export default function CreateAccountScreen() {
 
   return (
     <AuthScreenContainer title="Create your account" subtitle="Join Gopher as a User">
-      <AuthTextInput placeholder="Full name" value={fullName} onChangeText={setFullName} />
+      <AuthTextInput label="Full name" placeholder="Full name" value={fullName} onChangeText={setFullName} />
       <AuthTextInput
-        placeholder="Email"
+        label="Email"
+        placeholder="Enter your email"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
       <AuthTextInput
-        placeholder="Phone number"
+        label="Phone number"
+        placeholder="Enter your phone number"
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
       />
       <AuthTextInput
-        placeholder="Password"
+        label="Password"
+        placeholder="At least 6 characters"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <AuthTextInput
-        placeholder="Confirm password"
+        label="Confirm password"
+        placeholder="Re-enter your password"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -116,13 +122,27 @@ export default function CreateAccountScreen() {
 
       <AuthButton label="Continue" onPress={handleCreateAccount} loading={loading} />
 
-      <View>
-        <AuthButton
-          label="Want to earn instead? Become a Scout"
-          variant="secondary"
-          onPress={() => router.push("/scout-registration")}
-        />
-      </View>
+      <Pressable onPress={() => router.push("/scout-registration")}>
+  <Text style={styles.link}>
+    Want to earn instead?{" "}
+    <Text style={styles.linkBold}>Become a Scout</Text>
+  </Text>
+</Pressable>
     </AuthScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  link: {
+    color: colors.textPrimary,
+    opacity: 0.7,
+    fontFamily: fonts.bodyMedium,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  linkBold: {
+    color: colors.accent,
+    opacity: 1,
+    fontFamily: fonts.bodySemiBold,
+  },
+});

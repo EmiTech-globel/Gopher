@@ -9,6 +9,8 @@ import {
   ErrorText,
   EmailOtpStep,
 } from "../../components/auth";
+import { IconMail } from "@tabler/icons-react-native";
+import { colors } from "../../theme";
 
 export const PENDING_MATRIC_KEY = "gopher.pendingMatricNumber";
 
@@ -76,10 +78,11 @@ export default function ScoutRegistrationScreen() {
 
   if (showOtp) {
     return (
-      <AuthScreenContainer
-        title="Verify your email"
-        subtitle="Confirm your email, then we'll capture your selfie and ID"
-      >
+<AuthScreenContainer
+  title="Verify your email"
+  subtitle="Almost there — confirm your email to finish creating your account"
+  icon={<IconMail size={28} color={colors.accent}  />}
+>
         <EmailOtpStep
           email={email.trim()}
           onVerified={() => {
@@ -94,34 +97,54 @@ export default function ScoutRegistrationScreen() {
 
   return (
     <AuthScreenContainer title="Become a Scout" subtitle="Run errands for other students and earn weekly">
-      <AuthTextInput placeholder="Full name" value={fullName} onChangeText={setFullName} />
       <AuthTextInput
-        placeholder="Email"
+        label="Full name"
+        placeholder="Full name"
+        value={fullName}
+        onChangeText={setFullName}
+      />
+      <AuthTextInput
+        label="Email"
+        placeholder="Enter your email"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
       <AuthTextInput
-        placeholder="Phone number"
+        label="Phone number"
+        placeholder="Enter your phone number"
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
       />
-      <AuthTextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
       <AuthTextInput
-        placeholder="Confirm password"
+        label="Password"
+        placeholder="At least 6 characters"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <AuthTextInput
+        label="Confirm password"
+        placeholder="Re-enter your password"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
       <AuthTextInput
-        placeholder="Matric number"
+        label="Matric number"
+        placeholder="M.25/ND/PEG/*****"
         autoCapitalize="characters"
         value={matricNumber}
         onChangeText={setMatricNumber}
       />
-      <AuthTextInput placeholder="Department" value={department} onChangeText={setDepartment} />
+      <AuthTextInput 
+      label="Department" 
+      placeholder="Department" 
+      value={department} 
+      onChangeText={setDepartment} 
+      />
 
       <ErrorText message={errorMessage} />
 

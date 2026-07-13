@@ -8,6 +8,7 @@ import { PENDING_SELFIE_URI_KEY } from "./selfie-capture";
 import { PENDING_MATRIC_KEY } from "./scout-registration";
 import { ErrorText } from "../../components/auth";
 import { createClient } from "@supabase/supabase-js";
+import { colors, fonts } from "../../theme";
 
 async function uploadPhoto(
   uri: string,
@@ -41,10 +42,6 @@ export default function IdCaptureScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const cameraRef = useRef<CameraView>(null);
-  // A ref, not state — state updates are async/batched and won't block
-  // a second tap that lands before the re-render. This is what actually
-  // caused the double-invocation bug (two uploads to the same path, the
-  // second becoming an UPDATE with no matching RLS policy).
   const submittingRef = useRef(false);
 
   async function handleCapture() {
@@ -66,13 +63,6 @@ export default function IdCaptureScreen() {
         return;
       }
 
-      // TEMP DEBUG — remove after this test
-      const { data: profileCheck, error: profileCheckError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", session.user.id)
-        .single();
-     
       const selfieUri = await AsyncStorage.getItem(PENDING_SELFIE_URI_KEY);
       const matricNumber = await AsyncStorage.getItem(PENDING_MATRIC_KEY);
 
@@ -157,14 +147,69 @@ export default function IdCaptureScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#1A0E22", alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  title: { fontSize: 22, fontWeight: "700", color: "#D7AEAD", textAlign: "center", marginBottom: 8 },
-  subtitle: { fontSize: 14, color: "#FFFFFF", opacity: 0.7, textAlign: "center", marginBottom: 24, lineHeight: 20 },
-  camera: { width: 320, height: 220, borderRadius: 16, overflow: "hidden", marginBottom: 24 },
-  previewBox: { width: 320, height: 220, borderRadius: 16, backgroundColor: "#2A1533", marginBottom: 24 },
-  text: { color: "#FFFFFF", textAlign: "center", fontSize: 15, lineHeight: 21 },
-  button: { backgroundColor: "#532B59", paddingVertical: 14, paddingHorizontal: 48, borderRadius: 12, marginBottom: 16 },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "#D7AEAD", fontSize: 16, fontWeight: "600" },
-  link: { color: "#D7AEAD", opacity: 0.7, fontSize: 14 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surfaceBase,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+  },
+  title: {
+    fontSize: 22,
+    fontFamily: fonts.headingBold,
+    color: colors.accent,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: fonts.bodyRegular,
+    color: colors.textPrimary,
+    opacity: 0.7,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  camera: {
+    width: 320,
+    height: 220,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 24,
+  },
+  previewBox: {
+    width: 320,
+    height: 220,
+    borderRadius: 16,
+    backgroundColor: colors.surfaceRaised,
+    marginBottom: 24,
+  },
+  text: {
+    color: colors.textPrimary,
+    fontFamily: fonts.bodyRegular,
+    textAlign: "center",
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 48,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: colors.accent,
+    fontSize: 16,
+    fontFamily: fonts.bodySemiBold,
+  },
+  link: {
+    color: colors.accent,
+    opacity: 0.7,
+    fontFamily: fonts.bodyRegular,
+    fontSize: 14,
+  },
 });

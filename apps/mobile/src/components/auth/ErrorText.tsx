@@ -1,4 +1,5 @@
 import { Text, StyleSheet } from "react-native";
+import { colors, fonts } from "../../theme";
 
 export function ErrorText({ message }: { message: string | null }) {
   if (!message) return null;
@@ -7,7 +8,8 @@ export function ErrorText({ message }: { message: string | null }) {
 
 const styles = StyleSheet.create({
   error: {
-    color: "#C15C6B",
+    color: colors.error,
+    fontFamily: fonts.bodyMedium,
     fontSize: 13,
     marginBottom: 12,
     textAlign: "center",

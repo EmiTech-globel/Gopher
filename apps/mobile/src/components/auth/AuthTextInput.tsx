@@ -1,27 +1,44 @@
 import { forwardRef } from "react";
-import { TextInput, type TextInputProps, StyleSheet } from "react-native";
+import { View, Text, TextInput, type TextInputProps, StyleSheet } from "react-native";
+import { colors, fonts } from "../../theme";
 
-export const AuthTextInput = forwardRef<TextInput, TextInputProps>(
-  function AuthTextInput(props, ref) {
+interface AuthTextInputProps extends TextInputProps {
+  label?: string;
+}
+
+export const AuthTextInput = forwardRef<TextInput, AuthTextInputProps>(
+  function AuthTextInput({ label, style, ...props }, ref) {
     return (
-      <TextInput
-        ref={ref}
-        placeholderTextColor="#D7AEAD80"
-        {...props}
-        style={[styles.input, props.style]}
-      />
+      <View style={styles.field}>
+        {label && <Text style={styles.label}>{label}</Text>}
+        <TextInput
+          ref={ref}
+          placeholderTextColor={colors.textSecondary + "80"}
+          {...props}
+          style={[styles.input, style]}
+        />
+      </View>
     );
   }
 );
 
 const styles = StyleSheet.create({
+  field: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 13,
+    fontFamily: fonts.bodyMedium,
+    color: colors.textSecondary,
+    marginBottom: 6,
+  },
   input: {
-    backgroundColor: "#2A1533",
-    color: "#FFFFFF",
+    backgroundColor: colors.surfaceRaised,
+    color: colors.textPrimary,
+    fontFamily: fonts.bodyRegular,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    marginBottom: 12,
     fontSize: 15,
   },
 });

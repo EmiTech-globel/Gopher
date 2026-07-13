@@ -11,14 +11,22 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { onboardingSlides } from "../../data/onboarding-slides";
+import { IconShoppingBag, IconRun, IconWallet } from "@tabler/icons-react-native";
+import { onboardingSlides, type OnboardingSlide } from "../../data/onboarding-slides";
+import { colors, fonts } from "../../theme";
 
 const ONBOARDING_SEEN_KEY = "gopher.onboardingSeen";
+
+const slideIcons: Record<OnboardingSlide["icon"], typeof IconShoppingBag> = {
+  "shopping-bag": IconShoppingBag,
+  run: IconRun,
+  wallet: IconWallet,
+};
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
-  const listRef = useRef<FlatList>(null);
+  const listRef = useRef<FlatList<OnboardingSlide>>(null);
 
   const isLastSlide = activeIndex === onboardingSlides.length - 1;
 
@@ -42,7 +50,13 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      {!isLastSlide && (
+        <Pressable style={styles.skip} onPress={completeOnboarding} hitSlop={12}>
+          <Text style={styles.skipText}>Skip</Text>
+        </Pressable>
+      )}
+
+      <FlatList<OnboardingSlide>
         ref={listRef}
         data={onboardingSlides}
         keyExtractor={(item) => item.id}
@@ -50,12 +64,18 @@ export default function OnboardingScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScroll}
-        renderItem={({ item }) => (
-          <View style={[styles.slide, { width }]}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const SlideIcon = slideIcons[item.icon];
+          return (
+            <View style={[styles.slide, { width }]}>
+              <View style={styles.iconCircle}>
+                <SlideIcon size={36} color={colors.accent} strokeWidth={1.75} />
+              </View>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.description}>{item.description}</Text>
+            </View>
+          );
+        }}
       />
 
       <View style={styles.footer}>
@@ -63,10 +83,7 @@ export default function OnboardingScreen() {
           {onboardingSlides.map((slide, index) => (
             <View
               key={slide.id}
-              style={[
-                styles.dot,
-                index === activeIndex && styles.dotActive,
-              ]}
+              style={[styles.dot, index === activeIndex && styles.dotActive]}
             />
           ))}
         </View>
@@ -76,12 +93,6 @@ export default function OnboardingScreen() {
             {isLastSlide ? "Get started" : "Next"}
           </Text>
         </Pressable>
-
-        {!isLastSlide && (
-          <Pressable onPress={completeOnboarding}>
-            <Text style={styles.skip}>Skip</Text>
-          </Pressable>
-        )}
       </View>
     </View>
   );
@@ -90,7 +101,21 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1A0E22",
+    backgroundColor: colors.surfaceBase,
+  },
+  skip: {
+    position: "absolute",
+    top: 56,
+    right: 24,
+    zIndex: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  skipText: {
+    color: colors.accent,
+    opacity: 0.6,
+    fontFamily: fonts.bodyRegular,
+    fontSize: 14,
   },
   slide: {
     flex: 1,
@@ -98,16 +123,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 32,
   },
+  iconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: colors.surfaceElevated,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 28,
+  },
   title: {
     fontSize: 28,
-    fontWeight: "700",
-    color: "#D7AEAD",
+    fontFamily: fonts.headingBold,
+    color: colors.accent,
     textAlign: "center",
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
-    color: "#FFFFFF",
+    fontFamily: fonts.bodyRegular,
+    color: colors.textPrimary,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -124,28 +159,23 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#382142",
+    backgroundColor: colors.surfaceElevated,
     marginHorizontal: 4,
   },
   dotActive: {
-    backgroundColor: "#D7AEAD",
+    backgroundColor: colors.accent,
     width: 20,
   },
   button: {
-    backgroundColor: "#532B59",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 48,
     borderRadius: 12,
     marginBottom: 16,
   },
   buttonText: {
-    color: "#D7AEAD",
+    color: colors.accent,
     fontSize: 16,
-    fontWeight: "600",
-  },
-  skip: {
-    color: "#D7AEAD",
-    opacity: 0.6,
-    fontSize: 14,
+    fontFamily: fonts.bodySemiBold,
   },
 });

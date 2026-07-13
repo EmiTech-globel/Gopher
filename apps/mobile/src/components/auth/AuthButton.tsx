@@ -5,6 +5,7 @@ import {
   StyleSheet,
   type PressableProps,
 } from "react-native";
+import { colors, fonts } from "../../theme";
 
 interface AuthButtonProps extends PressableProps {
   label: string;
@@ -27,7 +28,7 @@ export function AuthButton({
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color="#D7AEAD" />
+        <ActivityIndicator color={colors.accent} />
       ) : (
         <Text style={[styles.text, variant === "secondary" && styles.secondaryText]}>
           {label}
@@ -39,7 +40,7 @@ export function AuthButton({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#532B59",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -50,12 +51,13 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   text: {
-    color: "#D7AEAD",
+    color: colors.accent,
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: fonts.bodySemiBold,
   },
   secondaryText: {
     opacity: 0.8,
-    fontWeight: "500",
+    fontFamily: fonts.bodyMedium,
+    fontSize: 14,
   },
 });
