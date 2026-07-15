@@ -76,3 +76,10 @@ Screens must be built in this order since each depends on the one before:
 Everything after this point (Home, Post an errand, Browse errands, etc.)
 depends on knowing who's logged in and which role they're in, so auth
 and onboarding come first, before any role-specific screens.
+
+## Known Blockers (as of [date])
+   - Delivery fee zones/coordinates: decided in principle (Section 7), not
+     yet mapped to real campus locations. Needs a short walkthrough.
+   - Paystack Transfers require CAC business registration to go live.
+     Currently Starter Business (no CAC) — test mode should still work
+     for building; confirm in dashboard before assuming.

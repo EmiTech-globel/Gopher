@@ -11,6 +11,7 @@ import { useFocusEffect, router } from "expo-router";
 import { IconPlus, IconMapPin } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
 import { colors, fonts } from "../../theme";
+import { LinearGradient } from "expo-linear-gradient";
 
 const ACTIVE_STATUSES = ["open", "accepted", "purchased", "delivered", "disputed"];
 
@@ -79,10 +80,22 @@ export default function UserHomeScreen() {
       <Text style={styles.greeting}>Hey {firstName}</Text>
       <Text style={styles.subtitle}>What do you need today?</Text>
 
-      <Pressable style={styles.ctaButton} onPress={() => router.push("/(user)/post-errand")}>
-        <IconPlus size={20} color={colors.textPrimary} strokeWidth={2.25} />
-        <Text style={styles.ctaText}>Post an errand</Text>
-      </Pressable>
+      <Pressable onPress={() => router.push("/(user)/post-errand")}>
+  <LinearGradient
+    colors={[colors.deep, colors.primary]}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 1 }}
+    style={styles.ctaCard}
+  >
+    <View>
+      <Text style={styles.ctaTitle}>Post an errand</Text>
+      <Text style={styles.ctaSubtitle}>Get anything delivered on campus</Text>
+    </View>
+    <View style={styles.ctaIconCircle}>
+      <IconPlus size={22} color={colors.primary} strokeWidth={2.25} />
+    </View>
+  </LinearGradient>
+</Pressable>
 
       <Text style={styles.sectionTitle}>Active errand</Text>
       {activeErrand ? (
@@ -136,21 +149,35 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 24,
   },
-  ctaButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    paddingVertical: 16,
-    marginBottom: 32,
-  },
-  ctaText: {
-    color: colors.textPrimary,
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 16,
-    marginLeft: 8,
-  },
+ ctaCard: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  borderRadius: 20,
+  height: 150,
+  padding: 20,
+  marginBottom: 32,
+},
+ctaTitle: {
+  fontFamily: fonts.headingBold,
+  fontSize: 18,
+  color: colors.textPrimary,
+  marginBottom: 4,
+},
+ctaSubtitle: {
+  fontFamily: fonts.bodyRegular,
+  fontSize: 13,
+  color: colors.textPrimary,
+  opacity: 0.75,
+},
+ctaIconCircle: {
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  backgroundColor: colors.accent,
+  alignItems: "center",
+  justifyContent: "center",
+},
   sectionTitle: {
     fontSize: 15,
     fontFamily: fonts.headingMedium,

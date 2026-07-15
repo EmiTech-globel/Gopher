@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { colors, fonts } from "../../theme";
 
 type IconComponent = React.ComponentType<{
@@ -26,7 +26,6 @@ export function FloatingTabBar({
   centerAction,
 }: FloatingTabBarProps) {
   const visibleRoutes = state.routes.filter((route: any) => route.name in icons);
-  const CenterIcon = centerAction!.icon;
 
   return (
     <View style={styles.wrapper}>
@@ -49,15 +48,16 @@ export function FloatingTabBar({
           }
 
           return (
-            <Pressable key={route.key} style={styles.tab} onPress={handlePress}>
+            <Pressable
+              key={route.key}
+              onPress={handlePress}
+              style={[styles.tab, isFocused && styles.tabActive]}
+            >
               <TabIcon
-                size={22}
-                color={isFocused ? colors.accent : colors.textSecondary}
+                size={20}
+                color={isFocused ? colors.primary : colors.textSecondary}
                 strokeWidth={isFocused ? 2.25 : 1.75}
               />
-              <Text style={[styles.label, isFocused && styles.labelActive]}>
-                {options.title ?? route.name}
-              </Text>
             </Pressable>
           );
         })}
@@ -65,7 +65,7 @@ export function FloatingTabBar({
 
       {centerAction && (
         <Pressable style={styles.centerButton} onPress={centerAction.onPress}>
-          <CenterIcon size={26} color={colors.textPrimary} strokeWidth={2} />
+          <centerAction.icon size={26} color={colors.primary} strokeWidth={2.25} />
         </Pressable>
       )}
     </View>
@@ -75,7 +75,7 @@ export function FloatingTabBar({
 const styles = StyleSheet.create({
   wrapper: {
     position: "absolute",
-    bottom: 24,
+    bottom: 42,
     left: 24,
     right: 24,
     alignItems: "center",
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: colors.surfaceElevated,
     borderRadius: 32,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     justifyContent: "space-around",
     width: "100%",
     shadowColor: "#000",
@@ -95,19 +95,15 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   tab: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 8,
-    minWidth: 56,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
-  label: {
-    fontSize: 11,
-    fontFamily: fonts.bodyMedium,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  labelActive: {
-    color: colors.accent,
+  tabActive: {
+    backgroundColor: colors.accent,
   },
   centerButton: {
     position: "absolute",
@@ -115,7 +111,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
