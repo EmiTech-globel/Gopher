@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
+import { IconMail, IconLock } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
 import { colors, fonts } from "../../theme";
 import { routeAfterAuth } from "../../lib/route-after-auth";
@@ -53,7 +54,10 @@ export default function LoginScreen() {
       <Text style={styles.subtitle}>Log in to continue</Text>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Email</Text>
+        <View style={styles.labelRow}>
+          <IconMail size={20} color={colors.textSecondary} strokeWidth={1.75} />
+          <Text style={styles.label}>Email</Text>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Enter your email"
@@ -66,7 +70,10 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Password</Text>
+        <View style={styles.labelRow}>
+          <IconLock size={20} color={colors.textSecondary} strokeWidth={1.75} />
+          <Text style={styles.label}>Password</Text>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Enter your password"
@@ -128,7 +135,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 5,
   },
-
   subtitle: {
     fontSize: 14,
     fontFamily: fonts.bodyRegular,
@@ -140,11 +146,16 @@ const styles = StyleSheet.create({
   field: {
     marginBottom: 16,
   },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 8,
+  },
   label: {
-    fontSize: 13,
+    fontSize: 15,
     fontFamily: fonts.bodyMedium,
     color: colors.textSecondary,
-    marginBottom: 6,
   },
   input: {
     backgroundColor: colors.surfaceRaised,

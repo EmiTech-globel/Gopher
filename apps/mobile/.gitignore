@@ -8,6 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+build-1784478119276.apk
 
 # Native
 .kotlin/
@@ -39,3 +40,12 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Android / iOS build files
+apps/mobile/android/app/build/
+apps/mobile/android/.gradle/
+apps/mobile/ios/Pods/
+*.apk
+*.aab
+*.keystore
+build-1784478119276.apk

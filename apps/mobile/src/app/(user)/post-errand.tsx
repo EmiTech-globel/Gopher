@@ -90,7 +90,7 @@ export default function PostErrandScreen() {
 
       <AuthTextInput
         label="What do you need?"
-        placeholder="e.g. 2 packs of Indomie and a bottle of Coke"
+        placeholder="e.g. 2 packs of Indomie"
         value={itemDescription}
         onChangeText={setItemDescription}
         multiline
@@ -172,7 +172,12 @@ export default function PostErrandScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surfaceBase },
   content: { paddingHorizontal: 24, paddingTop: 64, paddingBottom: 175 },
-  title: { fontFamily: fonts.headingBold, fontSize: 24, color: colors.textPrimary, marginBottom: 4 },
+  title: { 
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    marginBottom: 4, 
+    color: colors.accentLight,
+  },
   subtitle: { fontFamily: fonts.bodyRegular, fontSize: 14, color: colors.textSecondary, marginBottom: 24 },
   label: { fontSize: 13, fontFamily: fonts.bodyMedium, color: colors.textSecondary, marginBottom: 6 },
   feeField: { marginBottom: 16 },

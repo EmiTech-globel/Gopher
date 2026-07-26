@@ -1,21 +1,19 @@
 import { Tabs, router } from "expo-router";
-import {
-  IconHome,
-  IconListCheck,
-  IconMessageCircle,
-  IconUser,
-  IconPlus,
-} from "@tabler/icons-react-native";
+import { IconHome, IconListCheck, IconMessageCircle, IconUser, IconPlus } from "@tabler/icons-react-native";
+import { useUnreadCount } from "../../lib/useUnreadCount";
 import { FloatingTabBar } from "../../components/navigation/FloatingTabBar";
 
-const userTabIcons = {
-  home: IconHome,
-  errands: IconListCheck,
-  chat: IconMessageCircle,
-  profile: IconUser,
+
+const userTabIcons = { 
+  home: IconHome, 
+  errands: IconListCheck, 
+  chat: IconMessageCircle, 
+  profile: IconUser 
 };
 
 export default function UserTabsLayout() {
+  const { count } = useUnreadCount();
+
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
@@ -23,10 +21,8 @@ export default function UserTabsLayout() {
         <FloatingTabBar
           {...props}
           icons={userTabIcons}
-          centerAction={{
-            icon: IconPlus,
-            onPress: () => router.push("/(user)/post-errand"),
-          }}
+          badges={{ chat: count }}
+          centerAction={{ icon: IconPlus, onPress: () => router.push("/(user)/post-errand") }}
         />
       )}
     >

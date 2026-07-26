@@ -282,6 +282,61 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          errand_id: string | null
+          id: string
+          read: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          errand_id?: string | null
+          id?: string
+          read?: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          errand_id?: string | null
+          id?: string
+          read?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_batch_items: {
         Row: {
           amount: number
@@ -591,22 +646,12 @@ export type Database = {
       }
       public_scouts: {
         Row: {
+          banned_at: string | null
           completed_errands_count: number | null
           profile_id: string | null
           rating_avg: number | null
+          rating_count: number | null
           trust_tier: Database["public"]["Enums"]["trust_tier"] | null
-        }
-        Insert: {
-          completed_errands_count?: number | null
-          profile_id?: string | null
-          rating_avg?: number | null
-          trust_tier?: Database["public"]["Enums"]["trust_tier"] | null
-        }
-        Update: {
-          completed_errands_count?: number | null
-          profile_id?: string | null
-          rating_avg?: number | null
-          trust_tier?: Database["public"]["Enums"]["trust_tier"] | null
         }
         Relationships: [
           {
@@ -627,6 +672,8 @@ export type Database = {
       }
     }
     Functions: {
+      expire_stale_balance_requests: { Args: never; Returns: undefined }
+      generate_weekly_payout_batches: { Args: never; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
@@ -645,6 +692,7 @@ export type Database = {
         | "confirmed"
         | "disputed"
         | "cancelled"
+      notification_type: "chat_message" | "balance_request_expired"
       payout_batch_status: "pending" | "paid"
       transaction_type:
         | "payment_in"
@@ -801,6 +849,7 @@ export const Constants = {
         "disputed",
         "cancelled",
       ],
+      notification_type: ["chat_message", "balance_request_expired"],
       payout_batch_status: ["pending", "paid"],
       transaction_type: [
         "payment_in",

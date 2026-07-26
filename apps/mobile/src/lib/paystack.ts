@@ -34,3 +34,26 @@ export async function initiateErrandPayment(input: PostErrandPaymentInput) {
 
   return data.reference;
 }
+
+export async function initiateBalanceTopupPayment(balanceRequestId: string) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/initialize-balance-topup`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ balance_request_id: balanceRequestId }),
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error ?? "Payment initialization failed");
+
+  await WebBrowser.openAuthSessionAsync(data.authorization_url);
+  return data.reference;
+}
