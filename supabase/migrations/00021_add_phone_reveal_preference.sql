@@ -1,0 +1,1 @@
+alter table profiles add column reveal_phone_by_default boolean not null default false;

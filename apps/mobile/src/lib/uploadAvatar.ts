@@ -3,7 +3,9 @@ import { supabase } from "./supabase";
 
 export async function pickAndUploadAvatar(userId: string): Promise<string | null> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return null;
+  if (!permission.granted) {
+    throw new Error("Photo library access was denied. Please enable it in Settings.");
+  }
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,

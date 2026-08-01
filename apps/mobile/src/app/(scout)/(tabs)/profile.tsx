@@ -7,10 +7,10 @@ import {
   IconShieldStar, IconUserPlus, IconFileText, IconBell, IconHelpCircle, IconChevronRight,
   IconUser,
 } from "@tabler/icons-react-native";
-import { supabase } from "../../lib/supabase";
-import { colors, fonts } from "../../theme";
-import { SettingsRow } from "../../components/SettingsRow";
-import { pickAndUploadAvatar } from "../../lib/uploadAvatar";
+import { supabase } from "../../../lib/supabase";
+import { colors, fonts } from "../../../theme";
+import { SettingsRow } from "../../../components/SettingsRow";
+import { pickAndUploadAvatar } from "../../../lib/uploadAvatar";
 
 interface ProfileData {
   full_name: string;
@@ -84,6 +84,11 @@ export default function ScoutProfileScreen() {
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "ratings", filter: `rated_user_id=eq.${data.user.id}` },
+          () => loadData()
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "scouts", filter: `profile_id=eq.${data.user.id}` },
           () => loadData()
         )
         .subscribe();

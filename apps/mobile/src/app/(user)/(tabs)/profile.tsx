@@ -5,10 +5,10 @@ import {
   IconPencil, IconLogout, IconUserPlus, IconRun, IconCreditCard,
   IconPhone, IconBell, IconHelpCircle, IconChevronRight,
 } from "@tabler/icons-react-native";
-import { supabase } from "../../lib/supabase";
-import { colors, fonts } from "../../theme";
-import { SettingsRow } from "../../components/SettingsRow";
-import { pickAndUploadAvatar } from "../../lib/uploadAvatar";
+import { supabase } from "../../../lib/supabase";
+import { colors, fonts } from "../../../theme";
+import { SettingsRow } from "../../../components/SettingsRow";
+import { pickAndUploadAvatar } from "../../../lib/uploadAvatar";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface ProfileData {
@@ -192,7 +192,7 @@ export default function UserProfileScreen() {
 
       <Text style={styles.sectionLabel}>Account</Text>
       <SettingsRow icon={IconUserPlus} label="Edit profile" onPress={() => router.push("/edit-profile")} />
-      <SettingsRow icon={IconCreditCard} label="Payment methods" onPress={() => router.push("/(user)/payment-methods")} />
+      <SettingsRow icon={IconCreditCard} label="Payment history" onPress={() => router.push("/(user)/payment-history")} />
       <SettingsRow icon={IconPhone} label="Phone reveal preference" onPress={() => router.push("/(user)/phone-preference")} showDivider={false} />
 
       <Text style={styles.sectionLabel}>Support</Text>

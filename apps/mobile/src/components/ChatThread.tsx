@@ -38,7 +38,17 @@ export function ChatThread({ errandId }: { errandId: string }) {
       .select("*")
       .eq("errand_id", errandId)
       .order("created_at", { ascending: true });
-    setMessages(data ?? []);
+    // Ensure messages are unique by id to avoid duplicate-key warnings
+    const unique: ChatMessage[] = [];
+    const seen = new Set<string>();
+    (data ?? []).forEach((m) => {
+      const id = String(m.id);
+      if (!seen.has(id)) {
+        seen.add(id);
+        unique.push(m);
+      }
+    });
+    setMessages(unique);
   }, [errandId]);
 
   useEffect(() => {
@@ -48,6 +58,14 @@ export function ChatThread({ errandId }: { errandId: string }) {
   useEffect(() => {
     loadMessages();
     if (!currentUserId) return;
+
+    // Mark all unread notifications for this errand as read so the badge
+    // and list stay in sync — the user is now actively viewing the chat.
+    supabase.from("notifications")
+      .update({ read: true })
+      .eq("user_id", currentUserId)
+      .eq("errand_id", errandId)
+      .eq("read", false);
 
     const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
     const hide = Keyboard.addListener("keyboardDidHide", () => {
@@ -59,15 +77,24 @@ export function ChatThread({ errandId }: { errandId: string }) {
     // sent messages are added optimistically the moment we tap send
     // (see handleSend), so echoing them back here would just duplicate
     // the bubble a beat later.
+    // Channel names are cached by the Supabase client, so reusing a stable
+    // name (e.g. just `chat:${errandId}`) means a re-mount can hand back an
+    // already-subscribed channel, and calling `.on()` on it throws
+    // "cannot add postgres_changes callbacks ... after subscribe()".
+    // A per-mount suffix keeps the name unique so the effect is idempotent.
     const channel = supabase
-      .channel(`chat:${errandId}`)
+      .channel(`chat:${errandId}:${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chat_messages", filter: `errand_id=eq.${errandId}` },
         (payload) => {
           const incoming = payload.new as ChatMessage;
           if (incoming.sender_id === currentUserId) return;
-          setMessages((current) => [...current, incoming]);
+          setMessages((current) => {
+            const exists = current.some((m) => String(m.id) === String(incoming.id));
+            if (exists) return current;
+            return [...current, incoming];
+          });
         }
       )
       .subscribe();
@@ -109,7 +136,20 @@ export function ChatThread({ errandId }: { errandId: string }) {
       return;
     }
 
-    setMessages((current) => current.map((m) => (m.id === tempId ? (data as ChatMessage) : m)));
+    setMessages((current) => {
+      const replaced = current.map((m) => (m.id === tempId ? (data as ChatMessage) : m));
+      // Deduplicate by id while keeping order
+      const seen = new Set<string>();
+      const unique: ChatMessage[] = [];
+      replaced.forEach((m) => {
+        const id = String(m.id);
+        if (!seen.has(id)) {
+          seen.add(id);
+          unique.push(m);
+        }
+      });
+      return unique;
+    });
   }
 
   return (

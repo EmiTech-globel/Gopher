@@ -42,12 +42,12 @@ export default function PayoutHistoryScreen() {
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()}>
-            <IconArrowLeft size={28} color={colors.textSecondary} strokeWidth={1.75} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Payment history</Text>
-          <View style={{ width: 20 }} />
-        </View>
+  <Pressable onPress={() => router.back()}>
+    <IconArrowLeft size={28} color={colors.textSecondary} strokeWidth={1.75} />
+  </Pressable>
+  <Text style={styles.headerTitle}>Payout History</Text>
+  <View style={{ width: 20 }} />
+</View>
       }
       renderItem={({ item }) => (
         <View style={styles.batchCard}>
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surfaceBase },
   content: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 60 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
-  headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
+headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
   batchCard: { backgroundColor: colors.surfaceRaised, borderRadius: 14, padding: 14, marginBottom: 10 },
   batchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   batchWeek: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.textPrimary },

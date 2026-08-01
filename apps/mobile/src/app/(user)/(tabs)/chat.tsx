@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from "react-native";
 import { useFocusEffect, router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { colors, fonts } from "../../theme";
+import { supabase } from "../../../lib/supabase";
+import { colors, fonts } from "../../../theme";
 
 const ARCHIVED_STATUSES = ["confirmed", "cancelled"];
 
@@ -92,10 +92,10 @@ export default function UserChatScreen() {
   const active = conversations.filter((c) => !ARCHIVED_STATUSES.includes(c.status));
   const archived = conversations.filter((c) => ARCHIVED_STATUSES.includes(c.status));
 
-  function renderRow(item: ConversationRow) {
+  function renderRow(item: ConversationRow, prefix = "") {
     return (
       <Pressable
-        key={item.errandId}
+        key={`${prefix}${item.errandId}`}
         style={styles.row}
         onPress={() => router.push(`/(user)/errand/${item.errandId}`)}
       >
@@ -141,14 +141,14 @@ export default function UserChatScreen() {
           {active.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>Active</Text>
-              {active.map(renderRow)}
+              {active.map((r) => renderRow(r, "a:"))}
             </>
           )}
 
           {archived.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>Archived</Text>
-              {archived.map(renderRow)}
+              {archived.map((r) => renderRow(r, "z:"))}
             </>
           )}
         </>

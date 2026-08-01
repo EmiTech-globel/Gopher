@@ -1,24 +1,20 @@
-import { Tabs } from "expo-router";
-import { IconHome, IconSearch, IconWallet, IconUser } from "@tabler/icons-react-native";
-import { FloatingTabBar } from "../../components/navigation/FloatingTabBar";
+import { Stack } from "expo-router";
 
-const scoutTabIcons = {
-  home: IconHome,
-  browse: IconSearch,
-  earnings: IconWallet,
-  profile: IconUser,
-};
-
-export default function ScoutTabsLayout() {
+/**
+ * The Scout area is a headerless Stack sitting above the tab bar.
+ *
+ * Detail screens reached from a tab (bank-setup, payout-history,
+ * notification, help-support, errand/[id], proof-of-purchase,
+ * request-funds, chat/[errandId]) push onto this Stack so router.back()
+ * returns to the screen that opened them (e.g. Profile), instead of
+ * falling through to the tab navigator's initial route (Home). Route
+ * groups are URL-transparent, so all existing absolute paths like
+ * /(scout)/home still resolve unchanged.
+ */
+export default function ScoutLayout() {
   return (
-    <Tabs
-      screenOptions={{ headerShown: false }}
-      tabBar={(props) => <FloatingTabBar {...props} icons={scoutTabIcons} />}
-    >
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="browse" options={{ title: "Browse" }} />
-      <Tabs.Screen name="earnings" options={{ title: "Earnings" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }

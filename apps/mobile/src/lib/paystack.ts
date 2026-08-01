@@ -51,8 +51,10 @@ export async function initiateBalanceTopupPayment(balanceRequestId: string) {
     }
   );
 
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error ?? "Payment initialization failed");
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.error ?? `Payment initialization failed (status ${response.status})`);
+  }
 
   await WebBrowser.openAuthSessionAsync(data.authorization_url);
   return data.reference;

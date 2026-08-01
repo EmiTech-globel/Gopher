@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { IconMapPin } from "@tabler/icons-react-native";
-import { supabase } from "../../lib/supabase";
-import { colors, fonts } from "../../theme";
+import { supabase } from "../../../lib/supabase";
+import { colors, fonts } from "../../../theme";
 
 type FilterTab = "active" | "completed";
 

@@ -11,6 +11,7 @@ import {
 } from "../../components/auth";
 import { Pressable, Text } from "react-native";
 import { colors, fonts } from "../../theme";
+import { IconUser, IconMail, IconPhone, IconLock } from "@tabler/icons-react-native";
 
 export default function CreateAccountScreen() {
   const [fullName, setFullName] = useState("");
@@ -87,9 +88,16 @@ export default function CreateAccountScreen() {
 
   return (
     <AuthScreenContainer title="Create your account" subtitle="Join Gopher as a User">
-      <AuthTextInput label="Full name" placeholder="Full name" value={fullName} onChangeText={setFullName} />
+      <AuthTextInput
+        label="Full name"
+        icon={<IconUser size={14} color={colors.textSecondary} strokeWidth={1.75} />}
+        placeholder="Full name"
+        value={fullName}
+        onChangeText={setFullName}
+      />
       <AuthTextInput
         label="Email"
+        icon={<IconMail size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Enter your email"
         autoCapitalize="none"
         keyboardType="email-address"
@@ -98,6 +106,7 @@ export default function CreateAccountScreen() {
       />
       <AuthTextInput
         label="Phone number"
+        icon={<IconPhone size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Enter your phone number"
         keyboardType="phone-pad"
         value={phone}
@@ -105,6 +114,7 @@ export default function CreateAccountScreen() {
       />
       <AuthTextInput
         label="Password"
+        icon={<IconLock size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="At least 6 characters"
         secureTextEntry
         value={password}
@@ -112,6 +122,7 @@ export default function CreateAccountScreen() {
       />
       <AuthTextInput
         label="Confirm password"
+        icon={<IconLock size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Re-enter your password"
         secureTextEntry
         value={confirmPassword}
@@ -123,11 +134,11 @@ export default function CreateAccountScreen() {
       <AuthButton label="Continue" onPress={handleCreateAccount} loading={loading} />
 
       <Pressable onPress={() => router.push("/scout-registration")}>
-  <Text style={styles.link}>
-    Want to earn instead?{" "}
-    <Text style={styles.linkBold}>Become a Scout</Text>
-  </Text>
-</Pressable>
+        <Text style={styles.link}>
+          Want to earn instead?{" "}
+          <Text style={styles.linkBold}>Become a Scout</Text>
+        </Text>
+      </Pressable>
     </AuthScreenContainer>
   );
 }

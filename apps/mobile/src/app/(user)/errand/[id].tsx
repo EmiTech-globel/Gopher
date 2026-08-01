@@ -1,20 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Alert, Keyboard } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Alert, Keyboard, Linking } from "react-native";
 import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
 import {
   IconArrowLeft, IconChevronDown, IconChevronUp, IconShieldCheck,
-  IconStar, IconCheck, IconCash,
+  IconStar, IconCheck, IconCash, IconPhone,
 } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { colors, fonts } from "../../../theme";
 import { initiateBalanceTopupPayment } from "../../../lib/paystack";
+import { autoRevealIfDefaultOn, getCounterpartPhone, revealMyPhone } from "../../../lib/phoneReveal";
 
 interface ErrandDetail {
   id: string;
   scout_id: string | null;
+  requester_id: string;
   item_description: string;
   status: string;
+  requester_phone_revealed: boolean;
 }
 
 interface ScoutSummary {
@@ -36,6 +40,11 @@ export default function TrackErrandScreen() {
   const [scoutSummary, setScoutSummary] = useState<ScoutSummary | null>(null);
   const [expanded, setExpanded] = useState(true);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState<{ id: string; requested_amount: number; reason: string | null } | null>(null);
+  const [respondingToRequest, setRespondingToRequest] = useState(false);
+  const [counterpartPhone, setCounterpartPhone] = useState<string | null>(null);
+  const [myPhoneRevealed, setMyPhoneRevealed] = useState(false);
+  const [phoneConfirmVisible, setPhoneConfirmVisible] = useState(false);
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
@@ -45,8 +54,6 @@ export default function TrackErrandScreen() {
       hide.remove();
     };
   }, []);
-  const [pendingRequest, setPendingRequest] = useState<{ id: string; requested_amount: number; reason: string | null } | null>(null);
-  const [respondingToRequest, setRespondingToRequest] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -67,6 +74,13 @@ export default function TrackErrandScreen() {
           completed_errands_count: scout.completed_errands_count ?? 0,
         });
       }
+
+      if (errandRow.status !== "open") {
+        await autoRevealIfDefaultOn(errandRow.id);
+        const phone = await getCounterpartPhone(errandRow.id);
+        setCounterpartPhone(phone);
+        setMyPhoneRevealed(errandRow.requester_phone_revealed);
+      }
     } else {
       setScoutSummary(null);
     }
@@ -86,6 +100,53 @@ export default function TrackErrandScreen() {
     }, [loadData])
   );
 
+  // Errand row changes (status, phone reveal flags)
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`errand-live:${id}:${Math.random()}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "errands", filter: `id=eq.${id}` },
+        () => loadData()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, loadData]);
+
+  // Balance requests — new request appears instantly, no need to leave and
+  // return to see it.
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`errand-balance-requests:${id}:${Math.random()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "balance_requests", filter: `errand_id=eq.${id}` },
+        () => loadData()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, loadData]);
+
+  function handlePhonePress() {
+    if (!errand) return;
+    if (counterpartPhone) {
+      Linking.openURL(`tel:${counterpartPhone}`);
+      return;
+    }
+    if (!myPhoneRevealed) {
+      setPhoneConfirmVisible(true);
+    }
+  }
+
+  async function handleConfirmReveal() {
+    if (!errand) return;
+    setPhoneConfirmVisible(false);
+    await revealMyPhone(errand.id);
+    setMyPhoneRevealed(true);
+  }
+
   async function handleApproveFunds() {
     if (!pendingRequest) return;
     setRespondingToRequest(true);
@@ -100,12 +161,27 @@ export default function TrackErrandScreen() {
   }
 
   async function handleDeclineFunds() {
-    if (!pendingRequest) return;
+    if (!pendingRequest || !errand) return;
     setRespondingToRequest(true);
     const { error } = await supabase
       .from("balance_requests")
       .update({ status: "declined" })
       .eq("id", pendingRequest.id);
+
+    if (!error) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Announce the decline in chat — this rides the existing
+        // notify_on_chat_message trigger, so the Scout gets a real
+        // notification without needing a separate notification path.
+        await supabase.from("chat_messages").insert({
+          errand_id: errand.id,
+          sender_id: user.id,
+          message_text: `Declined the request for an additional ₦${pendingRequest.requested_amount.toLocaleString()}.`,
+        });
+      }
+    }
+
     setRespondingToRequest(false);
 
     if (error) {
@@ -178,6 +254,9 @@ export default function TrackErrandScreen() {
                     <Text style={styles.ratingText}>{scoutSummary.rating_avg.toFixed(1)}</Text>
                   </View>
                 )}
+                <Pressable style={styles.phoneButton} onPress={handlePhonePress}>
+                  <IconPhone size={16} color={counterpartPhone ? colors.success : colors.textSecondary} strokeWidth={1.75} />
+                </Pressable>
               </View>
             )}
 
@@ -207,7 +286,11 @@ export default function TrackErrandScreen() {
                     onPress={handleApproveFunds}
                     disabled={respondingToRequest}
                   >
-                    <Text style={styles.approveButtonText}>Approve and pay</Text>
+                    {respondingToRequest ? (
+                      <ActivityIndicator color={colors.primary} size="small" />
+                    ) : (
+                      <Text style={styles.approveButtonText}>Approve and pay</Text>
+                    )}
                   </Pressable>
                 </View>
               </View>
@@ -263,6 +346,15 @@ export default function TrackErrandScreen() {
           <ChatThread errandId={errand.id} />
         </View>
       )}
+
+      <ConfirmDialog
+        visible={phoneConfirmVisible}
+        title="Share your number?"
+        message="This reveals your phone number to your Scout for this errand."
+        confirmLabel="Share"
+        onConfirm={handleConfirmReveal}
+        onCancel={() => setPhoneConfirmVisible(false)}
+      />
     </View>
   );
 }
@@ -298,8 +390,9 @@ const styles = StyleSheet.create({
   profileTextBlock: { flex: 1 },
   profileName: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.textPrimary },
   profileMeta: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  ratingRow: { flexDirection: "row", alignItems: "center" },
+  ratingRow: { flexDirection: "row", alignItems: "center", marginRight: 10 },
   ratingText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.textPrimary, marginLeft: 4 },
+  phoneButton: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceElevated, alignItems: "center", justifyContent: "center" },
   badgeRow: {
     flexDirection: "row", alignItems: "center", backgroundColor: "#16A34A22",
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, marginBottom: 16,

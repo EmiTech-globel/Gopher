@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 import {
-  View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Keyboard,
+  View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Keyboard, Linking,
 } from "react-native";
+import { useEffect } from "react";
 import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
 import {
   IconArrowLeft, IconChevronDown, IconChevronUp, IconPhone,
@@ -9,7 +10,9 @@ import {
 } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { colors, fonts } from "../../../theme";
+import { getCounterpartPhone, revealMyPhone, autoRevealIfDefaultOn } from "../../../lib/phoneReveal";
 
 interface ErrandDetail {
   id: string;
@@ -20,6 +23,7 @@ interface ErrandDetail {
   item_budget: number;
   delivery_fee: number;
   status: string;
+  scout_phone_revealed: boolean;
 }
 
 const CHARGES_FEE_RATE = 0.18;
@@ -36,6 +40,9 @@ export default function ScoutErrandDetailScreen() {
   const [requestReason, setRequestReason] = useState("");
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [balanceRequestStatus, setBalanceRequestStatus] = useState<string | null>(null);
+  const [counterpartPhone, setCounterpartPhone] = useState<string | null>(null);
+  const [myPhoneRevealed, setMyPhoneRevealed] = useState(false);
+  const [phoneConfirmVisible, setPhoneConfirmVisible] = useState(false);
 
   const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -54,6 +61,13 @@ export default function ScoutErrandDetailScreen() {
         .eq("id", errandRow.requester_id)
         .single();
       if (profile?.full_name) setRequesterName(profile.full_name);
+
+      if (errandRow.status !== "open") {
+        await autoRevealIfDefaultOn(errandRow.id);
+        const phone = await getCounterpartPhone(errandRow.id);
+        setCounterpartPhone(phone);
+        setMyPhoneRevealed(errandRow.scout_phone_revealed);
+      }
     }
 
     const { data: latestRequest } = await supabase
@@ -72,6 +86,52 @@ export default function ScoutErrandDetailScreen() {
       loadData();
     }, [loadData])
   );
+
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`errand-live:${id}:${Math.random()}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "errands", filter: `id=eq.${id}` },
+        () => loadData()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, loadData]);
+
+  // So the scout sees an "approved"/"declined"/"expired" status update the
+  // instant it happens, without leaving and re-entering the screen.
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`errand-balance-requests:${id}:${Math.random()}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "balance_requests", filter: `errand_id=eq.${id}` },
+        () => loadData()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, loadData]);
+
+  function handlePhonePress() {
+    if (!errand) return;
+    if (counterpartPhone) {
+      Linking.openURL(`tel:${counterpartPhone}`);
+      return;
+    }
+    if (!myPhoneRevealed) {
+      setPhoneConfirmVisible(true);
+    }
+  }
+
+  async function handleConfirmReveal() {
+    if (!errand) return;
+    setPhoneConfirmVisible(false);
+    await revealMyPhone(errand.id);
+    setMyPhoneRevealed(true);
+  }
 
   async function handleAcceptFromDetail() {
     if (!errand) return;
@@ -139,7 +199,7 @@ export default function ScoutErrandDetailScreen() {
     setFundsModalVisible(false);
     setRequestedAmount("");
     setRequestReason("");
-    Alert.alert("Request sent", "Waiting for the user to approve the additional amount.");
+    loadData();
   }
 
   async function handleCancelWithoutPenalty() {
@@ -215,11 +275,8 @@ export default function ScoutErrandDetailScreen() {
                 <Text style={styles.profileName}>{requesterName}</Text>
                 <Text style={styles.profileMeta}>{errand.dropoff_location}</Text>
               </View>
-              <Pressable
-                style={styles.phoneButton}
-                onPress={() => Alert.alert("Contact", "Ask in chat to share contact info.")}
-              >
-                <IconPhone size={16} color={colors.textSecondary} strokeWidth={1.75} />
+              <Pressable style={styles.phoneButton} onPress={handlePhonePress}>
+                <IconPhone size={16} color={counterpartPhone ? colors.success : colors.textSecondary} strokeWidth={1.75} />
               </Pressable>
             </View>
 
@@ -227,6 +284,17 @@ export default function ScoutErrandDetailScreen() {
               <IconShieldCheck size={15} color={colors.success} strokeWidth={2} />
               <Text style={styles.badgeText}>Payment secured · safe to proceed</Text>
             </View>
+
+            {balanceRequestStatus === "declined" && (
+              <View style={styles.statusNoteCard}>
+                <Text style={styles.statusNoteText}>Your last funds request was declined.</Text>
+              </View>
+            )}
+            {balanceRequestStatus === "approved" && (
+              <View style={[styles.statusNoteCard, styles.statusNoteApproved]}>
+                <Text style={[styles.statusNoteText, { color: colors.success }]}>Your additional funds request was approved and paid.</Text>
+              </View>
+            )}
 
             <View style={styles.taskCard}>
               <Text style={styles.taskLabel}>Buy</Text>
@@ -343,6 +411,15 @@ export default function ScoutErrandDetailScreen() {
           </View>
         </View>
       </Modal>
+
+      <ConfirmDialog
+        visible={phoneConfirmVisible}
+        title="Share your number?"
+        message="This reveals your phone number to the requester for this errand."
+        confirmLabel="Share"
+        onConfirm={handleConfirmReveal}
+        onCancel={() => setPhoneConfirmVisible(false)}
+      />
     </View>
   );
 }
@@ -382,6 +459,9 @@ const styles = StyleSheet.create({
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, marginBottom: 16,
   },
   badgeText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.success, marginLeft: 8 },
+  statusNoteCard: { backgroundColor: colors.surfaceElevated, borderRadius: 10, padding: 12, marginBottom: 16 },
+  statusNoteApproved: { backgroundColor: "#16A34A22" },
+  statusNoteText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.textSecondary, textAlign: "center" },
   taskCard: { backgroundColor: colors.surfaceRaised, borderRadius: 12, padding: 12, marginBottom: 16 },
   taskLabel: { fontFamily: fonts.bodyRegular, fontSize: 11, color: colors.textMuted, marginBottom: 2 },
   taskItem: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.textPrimary, marginBottom: 8 },

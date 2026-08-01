@@ -1,36 +1,19 @@
-import { Tabs, router } from "expo-router";
-import { IconHome, IconListCheck, IconMessageCircle, IconUser, IconPlus } from "@tabler/icons-react-native";
-import { useUnreadCount } from "../../lib/useUnreadCount";
-import { FloatingTabBar } from "../../components/navigation/FloatingTabBar";
+import { Stack } from "expo-router";
 
-
-const userTabIcons = { 
-  home: IconHome, 
-  errands: IconListCheck, 
-  chat: IconMessageCircle, 
-  profile: IconUser 
-};
-
-export default function UserTabsLayout() {
-  const { count } = useUnreadCount();
-
+/**
+ * The User area is a headerless Stack sitting above the tab bar.
+ *
+ * Detail screens reached from a tab (payment-history, phone-preference,
+ * notifications, help-support, post-errand, errand/[id]) push onto this
+ * Stack so router.back() returns to the screen that opened them (e.g.
+ * Profile), instead of falling through to the tab navigator's initial
+ * route (Home). Route groups are URL-transparent, so all existing
+ * absolute paths like /(user)/home still resolve unchanged.
+ */
+export default function UserLayout() {
   return (
-    <Tabs
-      screenOptions={{ headerShown: false }}
-      tabBar={(props) => (
-        <FloatingTabBar
-          {...props}
-          icons={userTabIcons}
-          badges={{ chat: count }}
-          centerAction={{ icon: IconPlus, onPress: () => router.push("/(user)/post-errand") }}
-        />
-      )}
-    >
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="errands" options={{ title: "Errands" }} />
-      <Tabs.Screen name="chat" options={{ title: "Chat" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
-      <Tabs.Screen name="post-errand" options={{ href: null }} />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }

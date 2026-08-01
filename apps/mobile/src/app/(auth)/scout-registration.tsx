@@ -9,7 +9,7 @@ import {
   ErrorText,
   EmailOtpStep,
 } from "../../components/auth";
-import { IconMail } from "@tabler/icons-react-native";
+import { IconMail, IconUser, IconPhone, IconLock, IconId, IconBuilding } from "@tabler/icons-react-native";
 import { colors } from "../../theme";
 
 export const PENDING_MATRIC_KEY = "gopher.pendingMatricNumber";
@@ -78,11 +78,11 @@ export default function ScoutRegistrationScreen() {
 
   if (showOtp) {
     return (
-<AuthScreenContainer
-  title="Verify your email"
-  subtitle="Almost there — confirm your email to finish creating your account"
-  icon={<IconMail size={28} color={colors.accent}  />}
->
+      <AuthScreenContainer
+        title="Verify your email"
+        subtitle="Almost there — confirm your email to finish creating your account"
+        icon={<IconMail size={28} color={colors.accent} />}
+      >
         <EmailOtpStep
           email={email.trim()}
           onVerified={() => {
@@ -99,12 +99,14 @@ export default function ScoutRegistrationScreen() {
     <AuthScreenContainer title="Become a Scout" subtitle="Run errands for other students and earn weekly">
       <AuthTextInput
         label="Full name"
+        icon={<IconUser size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Full name"
         value={fullName}
         onChangeText={setFullName}
       />
       <AuthTextInput
         label="Email"
+        icon={<IconMail size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Enter your email"
         autoCapitalize="none"
         keyboardType="email-address"
@@ -113,6 +115,7 @@ export default function ScoutRegistrationScreen() {
       />
       <AuthTextInput
         label="Phone number"
+        icon={<IconPhone size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Enter your phone number"
         keyboardType="phone-pad"
         value={phone}
@@ -120,6 +123,7 @@ export default function ScoutRegistrationScreen() {
       />
       <AuthTextInput
         label="Password"
+        icon={<IconLock size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="At least 6 characters"
         secureTextEntry
         value={password}
@@ -127,6 +131,7 @@ export default function ScoutRegistrationScreen() {
       />
       <AuthTextInput
         label="Confirm password"
+        icon={<IconLock size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Re-enter your password"
         secureTextEntry
         value={confirmPassword}
@@ -134,16 +139,18 @@ export default function ScoutRegistrationScreen() {
       />
       <AuthTextInput
         label="Matric number"
+        icon={<IconId size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="M.25/ND/PEG/*****"
         autoCapitalize="characters"
         value={matricNumber}
         onChangeText={setMatricNumber}
       />
-      <AuthTextInput 
-      label="Department" 
-      placeholder="Department" 
-      value={department} 
-      onChangeText={setDepartment} 
+      <AuthTextInput
+        label="Department"
+        icon={<IconBuilding size={14} color={colors.textSecondary} strokeWidth={1.75} />}
+        placeholder="Department"
+        value={department}
+        onChangeText={setDepartment}
       />
 
       <ErrorText message={errorMessage} />

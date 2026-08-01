@@ -3,9 +3,9 @@ import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { IconBell, IconCalendar, IconFileText } from "@tabler/icons-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { supabase } from "../../lib/supabase";
-import { useUnreadCount } from "../../lib/useUnreadCount";
-import { colors, fonts } from "../../theme";
+import { supabase } from "../../../lib/supabase";
+import { useUnreadCount } from "../../../lib/useUnreadCount";
+import { colors, fonts } from "../../../theme";
 
 const CHARGES_FEE_RATE = 0.18;
 
@@ -77,7 +77,7 @@ export default function EarningsScreen() {
         <>
           <View style={styles.headerRow}>
             <Text style={styles.title}>Earnings</Text>
-            <Pressable style={styles.bellButton} onPress={() => router.push("/(scout)/notifications")}>
+            <Pressable style={styles.bellButton} onPress={() => router.push("/(scout)/notification")}>
               <IconBell size={17} color={colors.textTertiary} strokeWidth={1.75} />
               {unreadCount > 0 && <View style={styles.bellDot} />}
             </Pressable>

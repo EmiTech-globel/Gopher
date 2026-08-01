@@ -1,12 +1,21 @@
 import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useFocusEffect, router } from "expo-router";
-import { IconArrowLeft, IconMessageCircle } from "@tabler/icons-react-native";
+import {
+  IconArrowLeft,
+  IconMessageCircle,
+  IconCheck,
+  IconPackage,
+  IconCoin,
+  IconX,
+  IconReceipt,
+} from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
 import { colors, fonts } from "../theme";
 
 interface NotificationRow {
   id: string;
+  type: string | null;
   title: string;
   body: string | null;
   errand_id: string | null;
@@ -50,6 +59,20 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
     return `${Math.floor(hours / 24)}d ago`;
   }
 
+  function NotifIcon({ type }: { type: string | null }) {
+    const props = { size: 16, color: colors.accent, strokeWidth: 1.75 };
+    switch (type) {
+      case "errand_accepted": return <IconCheck {...props} />;
+      case "errand_delivered": return <IconPackage {...props} />;
+      case "errand_confirmed": return <IconCheck {...props} />;
+      case "errand_cancelled": return <IconX {...props} color={colors.error} />;
+      case "balance_request_created":
+      case "balance_request_approved": return <IconCoin {...props} />;
+      case "proof_submitted": return <IconReceipt {...props} />;
+      default: return <IconMessageCircle {...props} />;
+    }
+  }
+
   return (
     <FlatList
       style={styles.container}
@@ -67,8 +90,8 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
       }
       renderItem={({ item }) => (
         <Pressable style={[styles.row, !item.read && styles.rowUnread]} onPress={() => handlePress(item)}>
-          <View style={styles.iconCircle}>
-            <IconMessageCircle size={16} color={colors.accent} strokeWidth={1.75} />
+          <View style={[styles.iconCircle, item.type === "errand_cancelled" && styles.iconCircleError]}>
+            <NotifIcon type={item.type} />
           </View>
           <View style={styles.rowContent}>
             <Text style={styles.notifTitle} numberOfLines={1}>{item.title}</Text>
@@ -90,11 +113,12 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surfaceBase },
   content: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 140 },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
-  headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
+ header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
+headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
   row: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceRaised, borderRadius: 14, padding: 12, marginBottom: 10 },
   rowUnread: { borderWidth: StyleSheet.hairlineWidth, borderColor: colors.accent },
   iconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceElevated, alignItems: "center", justifyContent: "center", marginRight: 12 },
+  iconCircleError: { backgroundColor: colors.error + "22" },
   rowContent: { flex: 1 },
   notifTitle: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.textPrimary },
   notifBody: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.textMuted, marginTop: 2 },

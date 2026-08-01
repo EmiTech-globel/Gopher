@@ -11,8 +11,8 @@ import {
 } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { IconShoppingBag, IconMapPin, IconLock } from "@tabler/icons-react-native";
-import { supabase } from "../../lib/supabase";
-import { colors, fonts } from "../../theme";
+import { supabase } from "../../../lib/supabase";
+import { colors, fonts } from "../../../theme";
 
 const NEW_SCOUT_VALUE_CAP = 2000;
 

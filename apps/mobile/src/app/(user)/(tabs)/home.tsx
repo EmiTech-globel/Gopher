@@ -3,9 +3,9 @@ import { View, Text, ScrollView, Pressable, StyleSheet, Image } from "react-nati
 import { useFocusEffect, router } from "expo-router";
 import { IconPlus, IconChevronRight, IconBell } from "@tabler/icons-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { supabase } from "../../lib/supabase";
-import { colors, fonts } from "../../theme";
-import { useUnreadCount } from "../../lib/useUnreadCount";
+import { supabase } from "../../../lib/supabase";
+import { colors, fonts } from "../../../theme";
+import { useUnreadCount } from "../../../lib/useUnreadCount";
 
 const ACTIVE_STATUSES = ["open", "accepted", "purchased", "delivered", "disputed"];
 

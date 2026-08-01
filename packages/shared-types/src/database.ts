@@ -212,7 +212,9 @@ export type Database = {
           processing_fee: number
           purchased_at: string | null
           requester_id: string
+          requester_phone_revealed: boolean
           scout_id: string | null
+          scout_phone_revealed: boolean
           status: Database["public"]["Enums"]["errand_status"]
         }
         Insert: {
@@ -230,7 +232,9 @@ export type Database = {
           processing_fee?: number
           purchased_at?: string | null
           requester_id: string
+          requester_phone_revealed?: boolean
           scout_id?: string | null
+          scout_phone_revealed?: boolean
           status?: Database["public"]["Enums"]["errand_status"]
         }
         Update: {
@@ -248,7 +252,9 @@ export type Database = {
           processing_fee?: number
           purchased_at?: string | null
           requester_id?: string
+          requester_phone_revealed?: boolean
           scout_id?: string | null
+          scout_phone_revealed?: boolean
           status?: Database["public"]["Enums"]["errand_status"]
         }
         Relationships: [
@@ -333,6 +339,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          token: string
+          platform: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          token: string
+          platform: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          token?: string
+          platform?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -430,6 +468,7 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          reveal_phone_by_default: boolean
         }
         Insert: {
           avatar_url?: string | null
@@ -439,6 +478,7 @@ export type Database = {
           full_name: string
           id: string
           phone?: string | null
+          reveal_phone_by_default?: boolean
         }
         Update: {
           avatar_url?: string | null
@@ -448,6 +488,7 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          reveal_phone_by_default?: boolean
         }
         Relationships: []
       }
@@ -674,7 +715,15 @@ export type Database = {
     Functions: {
       expire_stale_balance_requests: { Args: never; Returns: undefined }
       generate_weekly_payout_batches: { Args: never; Returns: undefined }
+      get_counterpart_phone: {
+        Args: { target_errand_id: string }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
+      reveal_my_phone: {
+        Args: { target_errand_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       balance_request_status: "pending" | "approved" | "declined" | "expired"
@@ -692,7 +741,16 @@ export type Database = {
         | "confirmed"
         | "disputed"
         | "cancelled"
-      notification_type: "chat_message" | "balance_request_expired"
+      notification_type:
+        | "chat_message"
+        | "balance_request_expired"
+        | "errand_accepted"
+        | "errand_delivered"
+        | "errand_confirmed"
+        | "errand_cancelled"
+        | "balance_request_created"
+        | "balance_request_approved"
+        | "proof_submitted"
       payout_batch_status: "pending" | "paid"
       transaction_type:
         | "payment_in"
@@ -849,7 +907,17 @@ export const Constants = {
         "disputed",
         "cancelled",
       ],
-      notification_type: ["chat_message", "balance_request_expired"],
+      notification_type: [
+        "chat_message",
+        "balance_request_expired",
+        "errand_accepted",
+        "errand_delivered",
+        "errand_confirmed",
+        "errand_cancelled",
+        "balance_request_created",
+        "balance_request_approved",
+        "proof_submitted",
+      ],
       payout_batch_status: ["pending", "paid"],
       transaction_type: [
         "payment_in",
