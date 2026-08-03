@@ -80,7 +80,9 @@ export default function CreateAccountScreen() {
             // profiles row already exists via the handle_new_user
             // trigger — nothing else to do for a regular User signup.
           }}
-          onContinue={() => router.replace("/login")}
+          onContinue={() =>
+            router.replace({ pathname: "/terms-and-conditions", params: { next: "/login" } })
+          }
         />
       </AuthScreenContainer>
     );

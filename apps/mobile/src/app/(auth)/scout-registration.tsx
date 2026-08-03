@@ -89,7 +89,9 @@ export default function ScoutRegistrationScreen() {
             // Session now exists, but the scouts row isn't created until
             // both photos are captured — see id-capture.tsx.
           }}
-          onContinue={() => router.push("/selfie-capture")}
+          onContinue={() =>
+            router.push({ pathname: "/terms-and-conditions", params: { next: "/selfie-capture" } })
+          }
         />
       </AuthScreenContainer>
     );
