@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
 import {
   IconArrowLeft, IconChevronDown, IconChevronUp, IconPhone,
-  IconShieldCheck, IconBuildingStore, IconMapPin, IconCheck, IconAlertCircle,
+  IconShieldCheck, IconBuildingStore, IconMapPin, IconCheck, IconAlertCircle, IconAlertTriangle,
 } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
@@ -43,6 +43,7 @@ export default function ScoutErrandDetailScreen() {
   const [counterpartPhone, setCounterpartPhone] = useState<string | null>(null);
   const [myPhoneRevealed, setMyPhoneRevealed] = useState(false);
   const [phoneConfirmVisible, setPhoneConfirmVisible] = useState(false);
+  const [cancelConfirmVisible, setCancelConfirmVisible] = useState(false);
 
   const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -204,6 +205,7 @@ export default function ScoutErrandDetailScreen() {
 
   async function handleCancelWithoutPenalty() {
     if (!errand) return;
+    setCancelConfirmVisible(false);
     setUpdating(true);
     const { error } = await supabase
       .from("errands")
@@ -285,6 +287,18 @@ export default function ScoutErrandDetailScreen() {
               <Text style={styles.badgeText}>Payment secured · safe to proceed</Text>
             </View>
 
+            {["accepted", "purchased", "delivered", "disputed"].includes(errand.status) && (
+              <Pressable
+                style={styles.reportIssueRow}
+                onPress={() => router.push(`/(scout)/dispute/${errand.id}`)}
+              >
+                <IconAlertTriangle size={14} color={colors.error} strokeWidth={1.75} />
+                <Text style={styles.reportIssueText}>
+                  {errand.status === "disputed" ? "View dispute status" : "Report an issue"}
+                </Text>
+              </Pressable>
+            )}
+
             {balanceRequestStatus === "declined" && (
               <View style={styles.statusNoteCard}>
                 <Text style={styles.statusNoteText}>Your last funds request was declined.</Text>
@@ -337,7 +351,7 @@ export default function ScoutErrandDetailScreen() {
                     <Text style={styles.expiredText}>
                       Your funds request expired without a response.
                     </Text>
-                    <Pressable style={styles.cancelButton} onPress={handleCancelWithoutPenalty} disabled={updating}>
+                    <Pressable style={styles.cancelButton} onPress={() => setCancelConfirmVisible(true)} disabled={updating}>
                       <Text style={styles.cancelButtonText}>Cancel errand (no penalty)</Text>
                     </Pressable>
                   </View>
@@ -420,6 +434,15 @@ export default function ScoutErrandDetailScreen() {
         onConfirm={handleConfirmReveal}
         onCancel={() => setPhoneConfirmVisible(false)}
       />
+
+      <ConfirmDialog
+        visible={cancelConfirmVisible}
+        title="Cancel this errand?"
+        message="It returns to the open pool for another scout to accept. Since your funds request expired without a response, this won't affect your reputation."
+        confirmLabel="Cancel errand"
+        onConfirm={handleCancelWithoutPenalty}
+        onCancel={() => setCancelConfirmVisible(false)}
+      />
     </View>
   );
 }
@@ -459,6 +482,8 @@ const styles = StyleSheet.create({
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, marginBottom: 16,
   },
   badgeText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.success, marginLeft: 8 },
+  reportIssueRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
+  reportIssueText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.error },
   statusNoteCard: { backgroundColor: colors.surfaceElevated, borderRadius: 10, padding: 12, marginBottom: 16 },
   statusNoteApproved: { backgroundColor: "#16A34A22" },
   statusNoteText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.textSecondary, textAlign: "center" },

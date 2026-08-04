@@ -54,12 +54,17 @@ pnpm dev:admin    # next dev
   and cancellation rules are all documented in the spec doc, not just in
   code comments.** If a business rule looks arbitrary in the code, check
   the doc before assuming it's wrong.
-- **The errand state machine is NOT yet enforced at the database level.**
-  See `supabase/migrations/00004_state_machine_triggers.sql` — this is
-  flagged intentionally, not forgotten.
-- **Delivery fee calculation is not yet implemented.** The zone/coordinate
-  model is decided (see spec Section on Charges Fee) but exact zones and
-  coordinates are pending a walkthrough.
+- **The errand state machine IS now enforced at the database level** —
+  see `supabase/migrations/00026_errand_state_machine.sql`. The old
+  `00004_state_machine_triggers.sql` flag comment is superseded; that
+  file is kept only as a historical marker of when this was still open.
+- **Trust-tier auto-upgrade is automated** — see
+  `supabase/migrations/00027_trust_tier_auto_upgrade.sql`. A scout hitting
+  3 completed errands with no unresolved dispute flips from `new` to
+  `trusted` automatically, no admin action required.
+- **Delivery fee calculation IS implemented** — see
+  `apps/mobile/src/data/campus-zones.ts` for the real PTI building
+  clusters (A–J) and the 3-tier proximity model.
 - No emojis, anywhere, in any UI copy or code comments. Tabler Icons only.
 
 ## Build Order — Screens (Shared, per spec Section 16)
@@ -77,9 +82,25 @@ Everything after this point (Home, Post an errand, Browse errands, etc.)
 depends on knowing who's logged in and which role they're in, so auth
 and onboarding come first, before any role-specific screens.
 
-## Known Blockers (as of [date])
-   - Delivery fee zones/coordinates: decided in principle (Section 7), not
-     yet mapped to real campus locations. Needs a short walkthrough.
-   - Paystack Transfers require CAC business registration to go live.
-     Currently Starter Business (no CAC) — test mode should still work
-     for building; confirm in dashboard before assuming.
+## Known Blockers (as of Aug 2026)
+   - **Paystack Transfers require CAC business registration to go live.**
+     Currently Starter Business (no CAC) — dashboard shows Transfer
+     permissions enabled despite this, which contradicts documentation;
+     a real test transfer is needed to confirm actual capability before
+     assuming CAC is still a blocker. This is the one remaining hard
+     gate before production.
+   - Custom SMTP domain verification: DONE. trixstudio.abrdns.com
+     verified in Resend, SPF/DKIM/DMARC all configured and confirmed via
+     mail-tester.com (10/10). Real emails now deliver to inbox, not just
+     the Resend account owner's address.
+   - Delivery fee zones/coordinates: DONE — see
+     `apps/mobile/src/data/campus-zones.ts`.
+   - Errand state machine enforcement: DONE — see
+     `supabase/migrations/00026_errand_state_machine.sql`.
+   - Trust-tier auto-upgrade: DONE — see
+     `supabase/migrations/00027_trust_tier_auto_upgrade.sql`.
+   - Terms & Conditions acceptance screen: built (`(auth)/terms-and-conditions.tsx`),
+     not yet pushed to the live branch as of this note.
+   - Admin dashboard (`apps/admin`): not yet built.
+   - Bidirectional rating (User→Scout only, or both directions): still an
+     open design decision, not yet built either way.

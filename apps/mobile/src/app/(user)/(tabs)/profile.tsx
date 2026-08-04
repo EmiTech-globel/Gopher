@@ -8,6 +8,7 @@ import {
 import { supabase } from "../../../lib/supabase";
 import { colors, fonts } from "../../../theme";
 import { SettingsRow } from "../../../components/SettingsRow";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { pickAndUploadAvatar } from "../../../lib/uploadAvatar";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -28,6 +29,7 @@ export default function UserProfileScreen() {
   const [scoutStatus, setScoutStatus] = useState<ScoutStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
+  const [signOutConfirmVisible, setSignOutConfirmVisible] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [errandsPostedCount, setErrandsPostedCount] = useState<number | null>(null);
 
@@ -72,6 +74,7 @@ export default function UserProfileScreen() {
   }, [loadData]);
 
   async function handleSignOut() {
+    setSignOutConfirmVisible(false);
     setSigningOut(true);
     await supabase.auth.signOut();
     setSigningOut(false);
@@ -199,10 +202,19 @@ export default function UserProfileScreen() {
       <SettingsRow icon={IconBell} label="Notifications" onPress={() => router.push("/(user)/notifications")} />
       <SettingsRow icon={IconHelpCircle} label="Help & support" onPress={() => router.push("/(user)/help-support")} showDivider={false} />
 
-      <Pressable style={styles.signOutButton} onPress={handleSignOut} disabled={signingOut}>
+      <Pressable style={styles.signOutButton} onPress={() => setSignOutConfirmVisible(true)} disabled={signingOut}>
         <IconLogout size={18} color={colors.error} strokeWidth={1.75} />
         <Text style={styles.signOutText}>{signingOut ? "Signing out..." : "Sign out"}</Text>
       </Pressable>
+
+      <ConfirmDialog
+        visible={signOutConfirmVisible}
+        title="Sign out?"
+        message="You'll need to log back in to post or track errands."
+        confirmLabel="Sign out"
+        onConfirm={handleSignOut}
+        onCancel={() => setSignOutConfirmVisible(false)}
+      />
     </ScrollView>
   );
 }

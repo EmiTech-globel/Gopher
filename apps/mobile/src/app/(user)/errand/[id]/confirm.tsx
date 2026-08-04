@@ -105,6 +105,13 @@ export default function DeliveryConfirmationScreen() {
     const { error } = await supabase.from("disputes").insert({
       errand_id: errandId, opened_by: user.id, reason: issueReason.trim(), status: "open",
     });
+    if (!error) {
+      // Pauses any pending fund release on this errand until an admin
+      // resolves it (spec Section 10) — matches the dedicated dispute
+      // screen's behavior so both entry points leave the errand in the
+      // same state.
+      await supabase.from("errands").update({ status: "disputed" }).eq("id", errandId);
+    }
     setSubmittingIssue(false);
     if (error) { Alert.alert("Couldn't submit", error.message); return; }
     setIssueModalVisible(false);

@@ -3,11 +3,13 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Alert
 import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
 import {
   IconArrowLeft, IconChevronDown, IconChevronUp, IconShieldCheck,
-  IconStar, IconCheck, IconCash, IconPhone,
+  IconStar, IconCheck, IconCash, IconPhone, IconAlertTriangle, IconPhoto,
 } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import { EvidenceViewerModal } from "../../../components/EvidenceViewerModal";
+import { getSignedEvidenceUrl } from "../../../lib/signedUrl";
 import { colors, fonts } from "../../../theme";
 import { initiateBalanceTopupPayment } from "../../../lib/paystack";
 import { autoRevealIfDefaultOn, getCounterpartPhone, revealMyPhone } from "../../../lib/phoneReveal";
@@ -40,11 +42,42 @@ export default function TrackErrandScreen() {
   const [scoutSummary, setScoutSummary] = useState<ScoutSummary | null>(null);
   const [expanded, setExpanded] = useState(true);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [pendingRequest, setPendingRequest] = useState<{ id: string; requested_amount: number; reason: string | null } | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<{ id: string; requested_amount: number; reason: string | null; evidence_photo_url: string | null } | null>(null);
   const [respondingToRequest, setRespondingToRequest] = useState(false);
   const [counterpartPhone, setCounterpartPhone] = useState<string | null>(null);
   const [myPhoneRevealed, setMyPhoneRevealed] = useState(false);
   const [phoneConfirmVisible, setPhoneConfirmVisible] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerLoading, setViewerLoading] = useState(false);
+
+  async function handleViewBalanceEvidence() {
+    if (!pendingRequest?.evidence_photo_url) return;
+    setViewerVisible(true);
+    setViewerLoading(true);
+    const url = await getSignedEvidenceUrl("balance-request-evidence", pendingRequest.evidence_photo_url);
+    setViewerUrl(url);
+    setViewerLoading(false);
+  }
+
+  async function handleViewProof(kind: "item" | "receipt") {
+    if (!errand) return;
+    setViewerVisible(true);
+    setViewerLoading(true);
+    const url = await getSignedEvidenceUrl("proof-of-purchase", `${errand.id}/${kind}.jpg`);
+    setViewerLoading(false);
+    if (!url) {
+      setViewerVisible(false);
+      Alert.alert(
+        "No photo available",
+        kind === "receipt"
+          ? "Your scout didn't submit a receipt photo for this errand."
+          : "No proof-of-purchase photo was submitted for this errand — your scout may be a trusted tier that skips this step."
+      );
+      return;
+    }
+    setViewerUrl(url);
+  }
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
@@ -87,7 +120,7 @@ export default function TrackErrandScreen() {
 
     const { data: balanceRequest } = await supabase
       .from("balance_requests")
-      .select("id, requested_amount, reason")
+      .select("id, requested_amount, reason, evidence_photo_url")
       .eq("errand_id", id)
       .eq("status", "pending")
       .maybeSingle();
@@ -216,6 +249,12 @@ export default function TrackErrandScreen() {
         {errand.status === "open" ? (
           <View style={styles.waitingCard}>
             <Text style={styles.waitingText}>Waiting for a Scout to accept this errand.</Text>
+            <Pressable
+              style={styles.cancelLink}
+              onPress={() => router.push(`/(user)/errand/${errand.id}/cancel`)}
+            >
+              <Text style={styles.cancelLinkText}>Cancel errand</Text>
+            </Pressable>
           </View>
         ) : expanded ? (
           <>
@@ -265,6 +304,27 @@ export default function TrackErrandScreen() {
               <Text style={styles.badgeText}>Payment secured · held safely until delivery</Text>
             </View>
 
+            {["accepted", "purchased", "delivered", "disputed"].includes(errand.status) && (
+              <Pressable
+                style={styles.reportIssueRow}
+                onPress={() => router.push(`/(user)/dispute/${errand.id}`)}
+              >
+                <IconAlertTriangle size={14} color={colors.error} strokeWidth={1.75} />
+                <Text style={styles.reportIssueText}>
+                  {errand.status === "disputed" ? "View dispute status" : "Report an issue"}
+                </Text>
+              </Pressable>
+            )}
+
+            {errand.status === "accepted" && (
+              <Pressable
+                style={styles.cancelLinkInline}
+                onPress={() => router.push(`/(user)/errand/${errand.id}/cancel`)}
+              >
+                <Text style={styles.cancelLinkText}>Cancel errand</Text>
+              </Pressable>
+            )}
+
             {pendingRequest && (
               <View style={styles.fundsRequestCard}>
                 <View style={styles.fundsRequestHeader}>
@@ -273,6 +333,12 @@ export default function TrackErrandScreen() {
                 </View>
                 <Text style={styles.fundsRequestAmount}>₦{pendingRequest.requested_amount.toLocaleString()}</Text>
                 {pendingRequest.reason && <Text style={styles.fundsRequestReason}>{pendingRequest.reason}</Text>}
+                {pendingRequest.evidence_photo_url && (
+                  <Pressable style={styles.evidenceLink} onPress={handleViewBalanceEvidence}>
+                    <IconPhoto size={14} color={colors.textSecondary} strokeWidth={1.75} />
+                    <Text style={styles.evidenceLinkText}>View price evidence</Text>
+                  </Pressable>
+                )}
                 <View style={styles.fundsRequestButtons}>
                   <Pressable
                     style={styles.declineButton}
@@ -318,6 +384,19 @@ export default function TrackErrandScreen() {
               })}
             </View>
 
+            {["purchased", "delivered", "confirmed", "disputed"].includes(errand.status) && (
+              <View style={styles.proofRow}>
+                <Pressable style={styles.proofButton} onPress={() => handleViewProof("item")}>
+                  <IconPhoto size={13} color={colors.textSecondary} strokeWidth={1.75} />
+                  <Text style={styles.proofButtonText}>Item photo</Text>
+                </Pressable>
+                <Pressable style={styles.proofButton} onPress={() => handleViewProof("receipt")}>
+                  <IconPhoto size={13} color={colors.textSecondary} strokeWidth={1.75} />
+                  <Text style={styles.proofButtonText}>Receipt</Text>
+                </Pressable>
+              </View>
+            )}
+
             {errand.status === "delivered" && (
               <Pressable style={styles.primaryButton} onPress={() => router.push(`/(user)/errand/${errand.id}/confirm`)}>
                 <IconCheck size={16} color={colors.deep} strokeWidth={2.25} />
@@ -355,6 +434,13 @@ export default function TrackErrandScreen() {
         onConfirm={handleConfirmReveal}
         onCancel={() => setPhoneConfirmVisible(false)}
       />
+
+      <EvidenceViewerModal
+        visible={viewerVisible}
+        imageUrl={viewerUrl}
+        loading={viewerLoading}
+        onClose={() => { setViewerVisible(false); setViewerUrl(null); }}
+      />
     </View>
   );
 }
@@ -371,6 +457,9 @@ const styles = StyleSheet.create({
   detailsContent: { paddingHorizontal: 20, paddingBottom: 8 },
   waitingCard: { backgroundColor: colors.surfaceRaised, borderRadius: 14, padding: 20, alignItems: "center" },
   waitingText: { fontFamily: fonts.bodyRegular, fontSize: 14, color: colors.textMuted, textAlign: "center" },
+  cancelLink: { marginTop: 12 },
+  cancelLinkInline: { marginBottom: 16 },
+  cancelLinkText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.textMuted, textDecorationLine: "underline" },
   minimizeRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   minimizeText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.textMuted, marginLeft: 4 },
   miniCard: {
@@ -398,12 +487,22 @@ const styles = StyleSheet.create({
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, marginBottom: 16,
   },
   badgeText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.success, marginLeft: 8, flex: 1 },
+  reportIssueRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
+  reportIssueText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.error },
   statusLabel: { fontFamily: fonts.bodyRegular, fontSize: 13, color: colors.textMuted, marginBottom: 10 },
+  proofRow: { flexDirection: "row", gap: 10, marginBottom: 14 },
+  proofButton: {
+    flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.surfaceElevated,
+    borderRadius: 10, paddingVertical: 9, paddingHorizontal: 14,
+  },
+  proofButtonText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.textSecondary },
   fundsRequestCard: { backgroundColor: colors.surfaceElevated, borderRadius: 14, padding: 14, marginBottom: 16 },
   fundsRequestHeader: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   fundsRequestTitle: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.textPrimary, marginLeft: 6 },
   fundsRequestAmount: { fontFamily: fonts.headingBold, fontSize: 20, color: colors.textPrimary, marginBottom: 4 },
   fundsRequestReason: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.textMuted, marginBottom: 12 },
+  evidenceLink: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 },
+  evidenceLinkText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.textSecondary, textDecorationLine: "underline" },
   fundsRequestButtons: { flexDirection: "row" },
   declineButton: { flex: 1, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.borderSubtle, borderRadius: 10, paddingVertical: 10, alignItems: "center", marginRight: 8 },
   declineButtonText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.textSecondary },
