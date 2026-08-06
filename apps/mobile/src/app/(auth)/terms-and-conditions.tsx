@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IconSquare, IconSquareCheck } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
 import { routeAfterAuth } from "../../lib/route-after-auth";
 import { TERMS_SECTIONS, TERMS_VERSION, TERMS_LAST_UPDATED } from "../../lib/terms";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { colors, fonts } from "../../theme";
 
 export default function TermsAndConditionsScreen() {
@@ -15,6 +16,7 @@ export default function TermsAndConditionsScreen() {
   const [checked, setChecked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [declineConfirmVisible, setDeclineConfirmVisible] = useState(false);
 
   async function handleAccept() {
     if (!checked || saving) return;
@@ -48,22 +50,10 @@ export default function TermsAndConditionsScreen() {
     }
   }
 
-  function handleDecline() {
-    Alert.alert(
-      "Decline Terms & Conditions",
-      "You need to accept the Terms & Conditions to use Gopher. Declining will sign you out.",
-      [
-        { text: "Go back", style: "cancel" },
-        {
-          text: "Sign out",
-          style: "destructive",
-          onPress: async () => {
-            await supabase.auth.signOut();
-            router.replace("/login");
-          },
-        },
-      ]
-    );
+  async function handleConfirmDecline() {
+    setDeclineConfirmVisible(false);
+    await supabase.auth.signOut();
+    router.replace("/login");
   }
 
   return (
@@ -113,10 +103,19 @@ export default function TermsAndConditionsScreen() {
           <Text style={styles.acceptText}>{saving ? "Saving..." : "Accept and continue"}</Text>
         </Pressable>
 
-        <Pressable onPress={handleDecline} disabled={saving}>
+        <Pressable onPress={() => setDeclineConfirmVisible(true)} disabled={saving}>
           <Text style={styles.declineText}>Decline</Text>
         </Pressable>
       </View>
+
+      <ConfirmDialog
+        visible={declineConfirmVisible}
+        title="Decline Terms & Conditions"
+        message="You need to accept the Terms & Conditions to use Gopher. Declining will sign you out."
+        confirmLabel="Sign out"
+        onConfirm={handleConfirmDecline}
+        onCancel={() => setDeclineConfirmVisible(false)}
+      />
     </View>
   );
 }

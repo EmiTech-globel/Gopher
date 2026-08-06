@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator, Image, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator, Image } from "react-native";
 import { router } from "expo-router";
 import { IconArrowLeft, IconPencil, IconUser, IconPhone, IconBuilding } from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
 import { pickAndUploadAvatar } from "../lib/uploadAvatar";
+import { AlertDialog } from "../components/AlertDialog";
+import { useAlertDialog } from "../lib/useAlertDialog";
 import { colors, fonts } from "../theme";
 
 export default function EditProfileScreen() {
@@ -15,6 +17,7 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const { showAlert, alertDialogProps } = useAlertDialog();
 
   useEffect(() => {
     async function load() {
@@ -46,7 +49,7 @@ export default function EditProfileScreen() {
       const url = await pickAndUploadAvatar(userId);
       if (url) setAvatarUrl(url);
     } catch (err) {
-      Alert.alert("Couldn't upload photo", err instanceof Error ? err.message : "Try again.");
+      showAlert("Couldn't upload photo", err instanceof Error ? err.message : "Try again.");
     } finally {
       setUploadingAvatar(false);
     }
@@ -55,7 +58,7 @@ export default function EditProfileScreen() {
   async function handleSave() {
     if (!userId) return;
     if (!fullName.trim()) {
-      Alert.alert("Name required", "Please enter your full name.");
+      showAlert("Name required", "Please enter your full name.");
       return;
     }
 
@@ -71,7 +74,7 @@ export default function EditProfileScreen() {
     setSaving(false);
 
     if (error) {
-      Alert.alert("Couldn't save", error.message);
+      showAlert("Couldn't save", error.message);
       return;
     }
     router.back();
@@ -156,6 +159,8 @@ export default function EditProfileScreen() {
           <Text style={styles.saveButtonText}>Save changes</Text>
         )}
       </Pressable>
+
+      <AlertDialog {...alertDialogProps} />
     </ScrollView>
   );
 }

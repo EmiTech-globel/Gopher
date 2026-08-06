@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import {
-  View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Keyboard, Linking,
+  View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Modal, TextInput, Keyboard, Linking,
 } from "react-native";
 import { useEffect } from "react";
 import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
@@ -11,6 +11,8 @@ import {
 import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import { AlertDialog } from "../../../components/AlertDialog";
+import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../theme";
 import { getCounterpartPhone, revealMyPhone, autoRevealIfDefaultOn } from "../../../lib/phoneReveal";
 
@@ -44,6 +46,7 @@ export default function ScoutErrandDetailScreen() {
   const [myPhoneRevealed, setMyPhoneRevealed] = useState(false);
   const [phoneConfirmVisible, setPhoneConfirmVisible] = useState(false);
   const [cancelConfirmVisible, setCancelConfirmVisible] = useState(false);
+  const { showAlert, alertDialogProps } = useAlertDialog();
 
   const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -149,8 +152,8 @@ export default function ScoutErrandDetailScreen() {
       .maybeSingle();
 
     setUpdating(false);
-    if (error) { Alert.alert("Couldn't accept errand", error.message); return; }
-    if (!data) { Alert.alert("Too late", "Another scout already accepted this errand."); loadData(); return; }
+    if (error) { showAlert("Couldn't accept errand", error.message); return; }
+    if (!data) { showAlert("Too late", "Another scout already accepted this errand."); loadData(); return; }
     loadData();
   }
 
@@ -166,7 +169,7 @@ export default function ScoutErrandDetailScreen() {
       .update({ status: "purchased", purchased_at: new Date().toISOString() })
       .eq("id", errand.id);
     setUpdating(false);
-    if (error) { Alert.alert("Couldn't update", error.message); return; }
+    if (error) { showAlert("Couldn't update", error.message); return; }
     loadData();
   }
 
@@ -178,14 +181,14 @@ export default function ScoutErrandDetailScreen() {
       .update({ status: "delivered", delivered_at: new Date().toISOString() })
       .eq("id", errand.id);
     setUpdating(false);
-    if (error) { Alert.alert("Couldn't update", error.message); return; }
+    if (error) { showAlert("Couldn't update", error.message); return; }
     loadData();
   }
 
   async function handleSubmitFundsRequest() {
     if (!errand) return;
     const amount = parseFloat(requestedAmount);
-    if (!amount || amount <= 0) { Alert.alert("Invalid amount", "Enter a valid additional amount."); return; }
+    if (!amount || amount <= 0) { showAlert("Invalid amount", "Enter a valid additional amount."); return; }
 
     setSubmittingRequest(true);
     const { error } = await supabase.from("balance_requests").insert({
@@ -196,7 +199,7 @@ export default function ScoutErrandDetailScreen() {
     });
     setSubmittingRequest(false);
 
-    if (error) { Alert.alert("Couldn't send request", error.message); return; }
+    if (error) { showAlert("Couldn't send request", error.message); return; }
     setFundsModalVisible(false);
     setRequestedAmount("");
     setRequestReason("");
@@ -212,7 +215,7 @@ export default function ScoutErrandDetailScreen() {
       .update({ scout_id: null, status: "open", accepted_at: null })
       .eq("id", errand.id);
     setUpdating(false);
-    if (error) { Alert.alert("Couldn't cancel", error.message); return; }
+    if (error) { showAlert("Couldn't cancel", error.message); return; }
     router.replace("/(scout)/home");
   }
 
@@ -443,6 +446,8 @@ export default function ScoutErrandDetailScreen() {
         onConfirm={handleCancelWithoutPenalty}
         onCancel={() => setCancelConfirmVisible(false)}
       />
+
+      <AlertDialog {...alertDialogProps} />
     </View>
   );
 }

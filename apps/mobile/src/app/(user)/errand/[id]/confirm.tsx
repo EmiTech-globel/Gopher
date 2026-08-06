@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, ScrollView, Pressable, StyleSheet, TextInput,
-  ActivityIndicator, Modal, Alert,
+  ActivityIndicator, Modal,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { IconCheck, IconStarFilled, IconStar, IconAlertTriangle } from "@tabler/icons-react-native";
 import { supabase } from "../../../../lib/supabase";
+import { AlertDialog } from "../../../../components/AlertDialog";
+import { useAlertDialog } from "../../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../../theme";
 
 export default function DeliveryConfirmationScreen() {
@@ -21,6 +23,7 @@ export default function DeliveryConfirmationScreen() {
   const [issueModalVisible, setIssueModalVisible] = useState(false);
   const [issueReason, setIssueReason] = useState("");
   const [submittingIssue, setSubmittingIssue] = useState(false);
+  const { showAlert, alertDialogProps } = useAlertDialog();
 
   useEffect(() => {
     async function load() {
@@ -51,7 +54,7 @@ export default function DeliveryConfirmationScreen() {
   async function handleConfirm() {
     if (!errandId || !scoutId) return;
     if (stars === 0) {
-      Alert.alert("Add a rating", "Please rate your Scout before confirming.");
+      showAlert("Add a rating", "Please rate your Scout before confirming.");
       return;
     }
 
@@ -63,14 +66,14 @@ export default function DeliveryConfirmationScreen() {
 
     if (updateError) {
       setSubmitting(false);
-      Alert.alert("Couldn't confirm delivery", updateError.message);
+      showAlert("Couldn't confirm delivery", updateError.message);
       return;
     }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.id) {
       setSubmitting(false);
-      Alert.alert("Couldn't confirm delivery", "Please sign in and try again.");
+      showAlert("Couldn't confirm delivery", "Please sign in and try again.");
       return;
     }
 
@@ -84,21 +87,30 @@ export default function DeliveryConfirmationScreen() {
 
     setSubmitting(false);
     if (ratingError) {
-      Alert.alert("Delivery confirmed", `But your rating couldn't be saved: ${ratingError.message}`);
+      // Delivery is already confirmed regardless of whether the rating
+      // saved — navigation waits until the user's actually seen this,
+      // since our themed dialog (unlike the native one) unmounts if we
+      // navigate away first.
+      showAlert(
+        "Delivery confirmed",
+        `But your rating couldn't be saved: ${ratingError.message}`,
+        { onDismiss: () => router.replace("/(user)/home") }
+      );
+      return;
     }
     router.replace("/(user)/home");
   }
 
   async function handleSubmitIssue() {
     if (!errandId || !issueReason.trim()) {
-      Alert.alert("Add a reason", "Please describe the issue.");
+      showAlert("Add a reason", "Please describe the issue.");
       return;
     }
     setSubmittingIssue(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.id) {
       setSubmittingIssue(false);
-      Alert.alert("Couldn't submit", "Please sign in and try again.");
+      showAlert("Couldn't submit", "Please sign in and try again.");
       return;
     }
 
@@ -113,10 +125,11 @@ export default function DeliveryConfirmationScreen() {
       await supabase.from("errands").update({ status: "disputed" }).eq("id", errandId);
     }
     setSubmittingIssue(false);
-    if (error) { Alert.alert("Couldn't submit", error.message); return; }
+    if (error) { showAlert("Couldn't submit", error.message); return; }
     setIssueModalVisible(false);
-    Alert.alert("Issue reported", "Our team will review this within 24 hours.");
-    router.replace("/(user)/home");
+    showAlert("Issue reported", "Our team will review this within 24 hours.", {
+      onDismiss: () => router.replace("/(user)/home"),
+    });
   }
 
   if (loading) {
@@ -210,6 +223,8 @@ export default function DeliveryConfirmationScreen() {
           </View>
         </View>
       </Modal>
+
+      <AlertDialog {...alertDialogProps} />
     </ScrollView>
   );
 }

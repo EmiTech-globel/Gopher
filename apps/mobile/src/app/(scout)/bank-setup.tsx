@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, TextInput, Pressable, StyleSheet, ScrollView,
-  ActivityIndicator, Modal, FlatList, Alert,
+  ActivityIndicator, Modal, FlatList,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { IconArrowLeft, IconChevronDown, IconCheck, IconSearch } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
 import { fetchBanks, resolveAccount, createTransferRecipient, type Bank } from "../../lib/bankSetup";
+import { AlertDialog } from "../../components/AlertDialog";
+import { useAlertDialog } from "../../lib/useAlertDialog";
 import { colors, fonts } from "../../theme";
 
 export default function BankSetupScreen() {
@@ -23,6 +25,7 @@ export default function BankSetupScreen() {
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [existingDetails, setExistingDetails] = useState<{ bank_name: string; account_number: string; account_name: string } | null>(null);
+  const { showAlert, alertDialogProps } = useAlertDialog();
 
   useEffect(() => {
     async function load() {
@@ -114,7 +117,7 @@ export default function BankSetupScreen() {
       try {
         const recipientResult = await createTransferRecipient(accountNumber, selectedBank.code, resolvedName);
         if (!recipientResult.recipient_code) {
-          Alert.alert(
+          showAlert(
             "Bank details saved",
             "Your bank details are on file. Automated payouts aren't available on this account yet, but your details are ready for when they are."
           );
@@ -238,6 +241,8 @@ export default function BankSetupScreen() {
           </View>
         </View>
       </Modal>
+
+      <AlertDialog {...alertDialogProps} />
     </ScrollView>
   );
 }

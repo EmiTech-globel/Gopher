@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import {
-  View, Text, TextInput, Pressable, ScrollView, Image, ActivityIndicator, StyleSheet, Alert,
+  View, Text, TextInput, Pressable, ScrollView, Image, ActivityIndicator, StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -9,6 +9,8 @@ import { IconArrowLeft, IconCamera, IconX, IconAlertTriangle } from "@tabler/ico
 import { supabase } from "../lib/supabase";
 import { getSignedEvidenceUrl } from "../lib/signedUrl";
 import { EvidenceViewerModal } from "./EvidenceViewerModal";
+import { AlertDialog } from "./AlertDialog";
+import { useAlertDialog } from "../lib/useAlertDialog";
 import { colors, fonts } from "../theme";
 
 const DISPUTABLE_STATUSES = ["accepted", "purchased", "delivered"];
@@ -47,6 +49,8 @@ export function DisputeScreen({ errandBasePath }: { errandBasePath: string }) {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
 
+  const { showAlert, alertDialogProps } = useAlertDialog();
+
   const loadData = useCallback(async () => {
     if (!errandId) return;
     setLoading(true);
@@ -73,7 +77,7 @@ export function DisputeScreen({ errandBasePath }: { errandBasePath: string }) {
     if (photos.length >= MAX_PHOTOS) return;
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Photo access needed", "Enable photo library access in Settings to attach evidence.");
+      showAlert("Photo access needed", "Enable photo library access in Settings to attach evidence.");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -265,6 +269,8 @@ export function DisputeScreen({ errandBasePath }: { errandBasePath: string }) {
         loading={viewerLoading}
         onClose={() => { setViewerVisible(false); setViewerUrl(null); }}
       />
+
+      <AlertDialog {...alertDialogProps} />
     </View>
   );
 }

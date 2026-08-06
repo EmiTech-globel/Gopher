@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Alert, Keyboard, Linking } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Keyboard, Linking } from "react-native";
 import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
 import {
   IconArrowLeft, IconChevronDown, IconChevronUp, IconShieldCheck,
@@ -9,6 +9,8 @@ import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EvidenceViewerModal } from "../../../components/EvidenceViewerModal";
+import { AlertDialog } from "../../../components/AlertDialog";
+import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { getSignedEvidenceUrl } from "../../../lib/signedUrl";
 import { colors, fonts } from "../../../theme";
 import { initiateBalanceTopupPayment } from "../../../lib/paystack";
@@ -50,6 +52,7 @@ export default function TrackErrandScreen() {
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
+  const { showAlert, alertDialogProps } = useAlertDialog();
 
   async function handleViewBalanceEvidence() {
     if (!pendingRequest?.evidence_photo_url) return;
@@ -68,7 +71,7 @@ export default function TrackErrandScreen() {
     setViewerLoading(false);
     if (!url) {
       setViewerVisible(false);
-      Alert.alert(
+      showAlert(
         "No photo available",
         kind === "receipt"
           ? "Your scout didn't submit a receipt photo for this errand."
@@ -187,7 +190,7 @@ export default function TrackErrandScreen() {
       await initiateBalanceTopupPayment(pendingRequest.id);
       loadData();
     } catch (err) {
-      Alert.alert("Couldn't start payment", err instanceof Error ? err.message : "Try again.");
+      showAlert("Couldn't start payment", err instanceof Error ? err.message : "Try again.");
     } finally {
       setRespondingToRequest(false);
     }
@@ -218,7 +221,7 @@ export default function TrackErrandScreen() {
     setRespondingToRequest(false);
 
     if (error) {
-      Alert.alert("Couldn't decline", error.message);
+      showAlert("Couldn't decline", error.message);
       return;
     }
     loadData();
@@ -441,6 +444,8 @@ export default function TrackErrandScreen() {
         loading={viewerLoading}
         onClose={() => { setViewerVisible(false); setViewerUrl(null); }}
       />
+
+      <AlertDialog {...alertDialogProps} />
     </View>
   );
 }

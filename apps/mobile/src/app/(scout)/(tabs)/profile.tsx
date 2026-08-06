@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ActivityIndicator, ScrollView, Image, Alert } from "react-native";
+import { View, Text, Pressable, StyleSheet, ActivityIndicator, ScrollView, Image } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -11,6 +11,8 @@ import { supabase } from "../../../lib/supabase";
 import { colors, fonts } from "../../../theme";
 import { SettingsRow } from "../../../components/SettingsRow";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import { AlertDialog } from "../../../components/AlertDialog";
+import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { pickAndUploadAvatar } from "../../../lib/uploadAvatar";
 
 interface ProfileData {
@@ -39,6 +41,7 @@ export default function ScoutProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutConfirmVisible, setSignOutConfirmVisible] = useState(false);
+  const { showAlert, alertDialogProps } = useAlertDialog();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -117,7 +120,7 @@ export default function ScoutProfileScreen() {
       const url = await pickAndUploadAvatar(user.id);
       if (url) setProfile((current) => (current ? { ...current, avatar_url: url } : current));
     } catch (err) {
-      Alert.alert("Couldn't upload photo", err instanceof Error ? err.message : "Try again.");
+      showAlert("Couldn't upload photo", err instanceof Error ? err.message : "Try again.");
     } finally {
       setUploadingAvatar(false);
     }
@@ -247,6 +250,8 @@ export default function ScoutProfileScreen() {
         onConfirm={handleSignOut}
         onCancel={() => setSignOutConfirmVisible(false)}
       />
+
+      <AlertDialog {...alertDialogProps} />
     </ScrollView>
   );
 }

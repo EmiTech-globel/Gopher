@@ -7,11 +7,12 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { IconShoppingBag, IconMapPin, IconLock } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
+import { AlertDialog } from "../../../components/AlertDialog";
+import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../theme";
 
 const NEW_SCOUT_VALUE_CAP = 2000;
@@ -32,6 +33,7 @@ export default function BrowseErrandsScreen() {
   const [trustTier, setTrustTier] = useState<"new" | "trusted">("new");
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const { showAlert, alertDialogProps } = useAlertDialog();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -87,11 +89,11 @@ export default function BrowseErrandsScreen() {
     setAcceptingId(null);
 
     if (error) {
-      Alert.alert("Couldn't accept errand", error.message);
+      showAlert("Couldn't accept errand", error.message);
       return;
     }
     if (!data) {
-      Alert.alert("Too late", "Another scout already accepted this errand.");
+      showAlert("Too late", "Another scout already accepted this errand.");
       loadData();
       return;
     }
@@ -176,6 +178,8 @@ export default function BrowseErrandsScreen() {
           ) : null
         }
       />
+
+      <AlertDialog {...alertDialogProps} />
     </View>
   );
 }
