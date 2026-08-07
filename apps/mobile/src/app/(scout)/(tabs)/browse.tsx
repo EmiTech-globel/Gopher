@@ -155,7 +155,7 @@ export default function BrowseErrandsScreen() {
           <Pressable
             style={[styles.acceptButton, atCapacity && styles.acceptButtonDisabled]}
             onPress={() => handleAccept(item)}
-            disabled={acceptingId === item.id || atCapacity}
+            disabled={acceptingId === item.id}
           >
             {acceptingId === item.id ? (
               <ActivityIndicator size="small" color={colors.primary} />

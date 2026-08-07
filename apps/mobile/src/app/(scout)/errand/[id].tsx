@@ -255,7 +255,7 @@ export default function ScoutErrandDetailScreen() {
                 <Text style={[styles.amountValue, { color: colors.success }]}>₦{netEarn.toLocaleString()}</Text>
               </View>
             </View>
-            <Pressable style={[styles.primaryButton, atCapacity && styles.primaryButtonDisabled]} onPress={handleAcceptFromDetail} disabled={updating || atCapacity}>
+            <Pressable style={[styles.primaryButton, atCapacity && styles.primaryButtonDisabled]} onPress={handleAcceptFromDetail} disabled={updating}>
               {updating ? <ActivityIndicator color={colors.deep} /> : <Text style={[styles.primaryButtonText, atCapacity && styles.primaryButtonTextDisabled]}>Accept errand</Text>}
             </Pressable>
           </View>
