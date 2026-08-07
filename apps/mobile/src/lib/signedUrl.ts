@@ -7,6 +7,10 @@ import { supabase } from "./supabase";
  * still needs a signed URL to actually render the image, since a private
  * bucket has no public URL. 1 hour is enough for a single viewing session
  * without leaving a link live indefinitely if it's ever copied out.
+ *
+ * A missing file (e.g. a scout skipped the optional receipt photo) is an
+ * expected, common case — not an error — so this stays quiet on that path
+ * and just returns null. Callers decide how to message it to the user.
  */
 export async function getSignedEvidenceUrl(
   bucket: string,
@@ -15,7 +19,6 @@ export async function getSignedEvidenceUrl(
 ): Promise<string | null> {
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresInSeconds);
   if (error || !data) {
-    console.error(`Failed to sign URL for ${bucket}/${path}`, error);
     return null;
   }
   return data.signedUrl;

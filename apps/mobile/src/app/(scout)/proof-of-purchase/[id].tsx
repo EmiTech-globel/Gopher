@@ -117,7 +117,7 @@ export default function ProofOfPurchaseScreen() {
           </Pressable>
         )}
 
-        {step === "receipt" && !submitting && (
+        {step === "item" && !submitting && (
           <Pressable onPress={handleSubmit}>
             <Text style={styles.link}>Skip receipt (item photo only)</Text>
           </Pressable>

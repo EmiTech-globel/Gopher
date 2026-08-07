@@ -36,7 +36,7 @@ function getStartOfWeek() {
 
 export default function ScoutHomeScreen() {
   const [profile, setProfile] = useState<ScoutProfile | null>(null);
-  const [activeErrand, setActiveErrand] = useState<ErrandRow | null>(null);
+  const [activeErrands, setActiveErrands] = useState<ErrandRow[]>([]);
   const [commissionThisWeek, setCommissionThisWeek] = useState(0);
   const [openErrandCount, setOpenErrandCount] = useState(0);
   const [ratingAvg, setRatingAvg] = useState<number | null>(null);
@@ -70,7 +70,7 @@ export default function ScoutHomeScreen() {
       trust_tier: statsRow?.trust_tier ?? "new",
     });
 
-    setActiveErrand(errands?.find((e) => ACTIVE_STATUSES.includes(e.status)) ?? null);
+    setActiveErrands((errands ?? []).filter((e) => ACTIVE_STATUSES.includes(e.status)));
     setOpenErrandCount(openCount ?? 0);
     setCompletedCount(statsRow?.completed_errands_count ?? 0);
     setRatingAvg(statsRow?.rating_avg ?? null);
@@ -163,18 +163,26 @@ export default function ScoutHomeScreen() {
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Active errand</Text>
-      {activeErrand ? (
-        <Pressable style={styles.errandRow} onPress={() => router.push(`/(scout)/errand/${activeErrand.id}`)}>
-          <View style={styles.errandAvatar}>
-            <Text style={styles.errandAvatarText}>{activeErrand.item_description.charAt(0).toUpperCase()}</Text>
-          </View>
-          <View style={styles.errandRowContent}>
-            <Text style={styles.errandItem} numberOfLines={1}>{activeErrand.item_description}</Text>
-            <Text style={styles.errandStatus}>{activeErrand.status === "delivered" ? "Delivered, awaiting confirmation" : "In progress"}</Text>
-          </View>
-          <IconChevronRight size={16} color={colors.textMuted} strokeWidth={1.75} />
-        </Pressable>
+      <Text style={styles.sectionTitle}>Active errand{activeErrands.length === 1 ? "" : "s"}</Text>
+      {activeErrands.length > 0 ? (
+        <View style={styles.errandList}>
+          {activeErrands.map((errand, index) => (
+            <Pressable
+              key={errand.id}
+              style={[styles.errandRow, index < activeErrands.length - 1 && styles.errandRowStacked]}
+              onPress={() => router.push(`/(scout)/errand/${errand.id}`)}
+            >
+              <View style={styles.errandAvatar}>
+                <Text style={styles.errandAvatarText}>{errand.item_description.charAt(0).toUpperCase()}</Text>
+              </View>
+              <View style={styles.errandRowContent}>
+                <Text style={styles.errandItem} numberOfLines={1}>{errand.item_description}</Text>
+                <Text style={styles.errandStatus}>{errand.status === "delivered" ? "Delivered, awaiting confirmation" : "In progress"}</Text>
+              </View>
+              <IconChevronRight size={16} color={colors.textMuted} strokeWidth={1.75} />
+            </Pressable>
+          ))}
+        </View>
       ) : (
         <View style={styles.emptyCard}>
           <Text style={styles.emptyText}>No active errand right now.</Text>
@@ -232,11 +240,13 @@ const styles = StyleSheet.create({
   statValue: { fontFamily: fonts.headingBold, fontSize: 18, color: colors.textPrimary, marginLeft: 4 },
   ratingRow: { flexDirection: "row", alignItems: "center" },
   sectionTitle: { fontFamily: fonts.headingMedium, fontSize: 14, color: colors.textPrimary, marginBottom: 10 },
+  errandList: { marginBottom: 20 },
   errandRow: {
     flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceRaised,
-    borderRadius: 14, padding: 12, marginBottom: 20,
+    borderRadius: 14, padding: 12,
     borderWidth: StyleSheet.hairlineWidth, borderColor: colors.borderSubtle,
   },
+  errandRowStacked: { marginBottom: 10 },
   errandAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accent, alignItems: "center", justifyContent: "center", marginRight: 10 },
   errandAvatarText: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.deep },
   errandRowContent: { flex: 1 },

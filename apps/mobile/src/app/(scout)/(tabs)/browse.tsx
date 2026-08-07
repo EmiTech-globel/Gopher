@@ -13,9 +13,11 @@ import { IconShoppingBag, IconMapPin, IconLock } from "@tabler/icons-react-nativ
 import { supabase } from "../../../lib/supabase";
 import { AlertDialog } from "../../../components/AlertDialog";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
+import { useActiveErrandCount } from "../../../lib/useActiveErrandCount";
 import { colors, fonts } from "../../../theme";
 
 const NEW_SCOUT_VALUE_CAP = 2000;
+const MAX_ACTIVE_ERRANDS = 2;
 
 interface OpenErrand {
   id: string;
@@ -34,6 +36,8 @@ export default function BrowseErrandsScreen() {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const { showAlert, alertDialogProps } = useAlertDialog();
+  const { count: activeErrandCount } = useActiveErrandCount();
+  const atCapacity = activeErrandCount >= MAX_ACTIVE_ERRANDS;
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -66,6 +70,11 @@ export default function BrowseErrandsScreen() {
   );
 
   async function handleAccept(errand: OpenErrand) {
+    if (atCapacity) {
+      showAlert("At capacity", `You already have ${MAX_ACTIVE_ERRANDS} active errands. Finish one before accepting another.`);
+      return;
+    }
+
     setAcceptingId(errand.id);
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -144,14 +153,14 @@ export default function BrowseErrandsScreen() {
             <Text style={styles.footerValue}>₦{item.delivery_fee.toLocaleString()}</Text>
           </View>
           <Pressable
-            style={styles.acceptButton}
+            style={[styles.acceptButton, atCapacity && styles.acceptButtonDisabled]}
             onPress={() => handleAccept(item)}
-            disabled={acceptingId === item.id}
+            disabled={acceptingId === item.id || atCapacity}
           >
             {acceptingId === item.id ? (
               <ActivityIndicator size="small" color={colors.primary} />
             ) : (
-              <Text style={styles.acceptText}>Accept</Text>
+              <Text style={[styles.acceptText, atCapacity && styles.acceptTextDisabled]}>Accept</Text>
             )}
           </Pressable>
         </View>
@@ -246,7 +255,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
+  acceptButtonDisabled: { opacity: 0.4 },
   acceptText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.primary },
+  acceptTextDisabled: { color: colors.textMuted },
   emptyState: { paddingTop: 60, alignItems: "center" },
   emptyText: {
     fontFamily: fonts.bodyRegular,

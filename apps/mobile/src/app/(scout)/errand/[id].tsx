@@ -15,6 +15,7 @@ import { AlertDialog } from "../../../components/AlertDialog";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../theme";
 import { getCounterpartPhone, revealMyPhone, autoRevealIfDefaultOn } from "../../../lib/phoneReveal";
+import { useActiveErrandCount } from "../../../lib/useActiveErrandCount";
 
 interface ErrandDetail {
   id: string;
@@ -29,6 +30,7 @@ interface ErrandDetail {
 }
 
 const CHARGES_FEE_RATE = 0.18;
+const MAX_ACTIVE_ERRANDS = 2;
 
 export default function ScoutErrandDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,6 +49,8 @@ export default function ScoutErrandDetailScreen() {
   const [phoneConfirmVisible, setPhoneConfirmVisible] = useState(false);
   const [cancelConfirmVisible, setCancelConfirmVisible] = useState(false);
   const { showAlert, alertDialogProps } = useAlertDialog();
+  const { count: activeErrandCount } = useActiveErrandCount();
+  const atCapacity = activeErrandCount >= MAX_ACTIVE_ERRANDS;
 
   const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -139,6 +143,10 @@ export default function ScoutErrandDetailScreen() {
 
   async function handleAcceptFromDetail() {
     if (!errand) return;
+    if (atCapacity) {
+      showAlert("At capacity", `You already have ${MAX_ACTIVE_ERRANDS} active errands. Finish one before accepting another.`);
+      return;
+    }
     setUpdating(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setUpdating(false); return; }
@@ -157,21 +165,10 @@ export default function ScoutErrandDetailScreen() {
     loadData();
   }
 
-  async function handleMarkPurchased() {
-    if (!errand) return;
-    if (trustTier === "new") {
-      router.push(`/(scout)/proof-of-purchase/${errand.id}`);
-      return;
-    }
-    setUpdating(true);
-    const { error } = await supabase
-      .from("errands")
-      .update({ status: "purchased", purchased_at: new Date().toISOString() })
-      .eq("id", errand.id);
-    setUpdating(false);
-    if (error) { showAlert("Couldn't update", error.message); return; }
-    loadData();
-  }
+ async function handleMarkPurchased() {
+  if (!errand) return;
+  router.push(`/(scout)/proof-of-purchase/${errand.id}`);
+}
 
   async function handleMarkDelivered() {
     if (!errand) return;
@@ -258,8 +255,8 @@ export default function ScoutErrandDetailScreen() {
                 <Text style={[styles.amountValue, { color: colors.success }]}>₦{netEarn.toLocaleString()}</Text>
               </View>
             </View>
-            <Pressable style={styles.primaryButton} onPress={handleAcceptFromDetail} disabled={updating}>
-              {updating ? <ActivityIndicator color={colors.deep} /> : <Text style={styles.primaryButtonText}>Accept errand</Text>}
+            <Pressable style={[styles.primaryButton, atCapacity && styles.primaryButtonDisabled]} onPress={handleAcceptFromDetail} disabled={updating || atCapacity}>
+              {updating ? <ActivityIndicator color={colors.deep} /> : <Text style={[styles.primaryButtonText, atCapacity && styles.primaryButtonTextDisabled]}>Accept errand</Text>}
             </Pressable>
           </View>
         ) : expanded ? (
@@ -341,9 +338,7 @@ export default function ScoutErrandDetailScreen() {
               <>
                 <Pressable style={styles.primaryButton} onPress={handleMarkPurchased} disabled={updating}>
                   <IconCheck size={16} color={colors.deep} strokeWidth={2.25} />
-                  <Text style={styles.primaryButtonText}>
-                    {trustTier === "new" ? "Submit proof of purchase" : "Mark as purchased"}
-                  </Text>
+                  <Text style={styles.primaryButtonText}>Submit proof of purchase</Text>
                 </Pressable>
                 <Pressable style={styles.outlineButton} onPress={() => router.push(`/(scout)/request-funds/${errand.id}`)}>
                   <IconAlertCircle size={15} color={colors.textSecondary} strokeWidth={1.75} />
@@ -511,7 +506,9 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", justifyContent: "center",
     backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 13, marginBottom: 10,
   },
+  primaryButtonDisabled: { opacity: 0.4 },
   primaryButtonText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.deep, marginLeft: 6 },
+  primaryButtonTextDisabled: { color: colors.textMuted },
   outlineButton: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
     borderWidth: StyleSheet.hairlineWidth, borderColor: colors.borderSubtle,
