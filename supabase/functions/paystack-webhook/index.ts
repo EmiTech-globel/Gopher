@@ -61,7 +61,7 @@ serve(async (req) => {
 
     const { data: errand } = await supabase
       .from("errands")
-      .select("item_budget")
+      .select("item_budget, requester_id")
       .eq("id", balanceRequest.errand_id)
       .single();
 
@@ -83,11 +83,13 @@ serve(async (req) => {
       status: "success",
     });
 
- await supabase.from("chat_messages").insert({
-  errand_id: balanceRequest.errand_id,
-  sender_id: errandForMessage.requester_id,
-  message_text: `Additional ₦${balanceRequest.requested_amount.toLocaleString()} approved and paid.`,
-});
+    if (errand?.requester_id) {
+      await supabase.from("chat_messages").insert({
+        errand_id: balanceRequest.errand_id,
+        sender_id: errand.requester_id,
+        message_text: `Additional ₦${balanceRequest.requested_amount.toLocaleString()} approved and paid.`,
+      });
+    }
 
     return new Response("OK", { status: 200 });
   }
