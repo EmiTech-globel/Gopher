@@ -4,6 +4,7 @@ const VARIANTS = {
   pending: "bg-status-pending-bg text-status-pending",
   disputed: "bg-status-disputed-bg text-status-disputed",
   resolved: "bg-status-resolved-bg text-status-resolved",
+  neutral: "bg-surface text-muted",
 } as const;
 
 export function StatusBadge({
