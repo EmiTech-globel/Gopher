@@ -1,26 +1,60 @@
 @import "tailwindcss";
 
+/*
+ * "Control room" palette per spec Section 13 — clean and functional,
+ * not a consumer app. Neutral white/grey/dark base; status colors
+ * (amber/red/green) are used ONLY functionally (badges, dots) and
+ * never decoratively. Deliberately light and fixed (no automatic
+ * dark-mode media query) — an internal ops tool should look the same
+ * regardless of the admin's OS theme, so nothing shifts unexpectedly
+ * mid-review.
+ */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --surface: #f9fafb;
+  --surface-raised: #ffffff;
+  --border: #e5e7eb;
+  --foreground: #111827;
+  --muted: #6b7280;
+  --muted-foreground: #9ca3af;
+
+  /* Brand accent, used sparingly — active nav item, primary buttons.
+     Pulled from the mobile app's primary token so the two products
+     feel related without the admin trying to look like a consumer app. */
+  --brand: #532b59;
+  --brand-foreground: #ffffff;
+
+  /* Status colors — functional only, per spec. */
+  --status-pending: #b45309;
+  --status-pending-bg: #fef3c7;
+  --status-disputed: #b91c1c;
+  --status-disputed-bg: #fee2e2;
+  --status-resolved: #15803d;
+  --status-resolved-bg: #dcfce7;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-disputed: var(--status-disputed);
+  --color-status-disputed-bg: var(--status-disputed-bg);
+  --color-status-resolved: var(--status-resolved);
+  --color-status-resolved-bg: var(--status-resolved-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
