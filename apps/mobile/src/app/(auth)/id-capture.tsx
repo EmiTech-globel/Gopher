@@ -64,25 +64,46 @@ export default function IdCaptureScreen() {
       }
 
       const selfieUri = await AsyncStorage.getItem(PENDING_SELFIE_URI_KEY);
-      const matricNumber = await AsyncStorage.getItem(PENDING_MATRIC_KEY);
+      let matricNumber = await AsyncStorage.getItem(PENDING_MATRIC_KEY);
+
+      const userId = session.user.id;
+
+      // Resubmission case: PENDING_MATRIC_KEY was already cleared after
+      // the first successful submission, so there's nothing pending in
+      // AsyncStorage — fall back to what's already on file instead of
+      // forcing the applicant to re-type their matric number.
+      if (!matricNumber) {
+        const { data: existingScout } = await supabase
+          .from("scouts")
+          .select("matric_number")
+          .eq("profile_id", userId)
+          .maybeSingle();
+        matricNumber = existingScout?.matric_number ?? null;
+      }
 
       if (!selfieUri || !matricNumber) {
         setErrorMessage("Missing registration details. Please start over.");
         return;
       }
 
-      const userId = session.user.id;
       const selfiePath = await uploadPhoto(selfieUri, userId, "selfie.jpg", session.access_token);
       const idPath = await uploadPhoto(capturedUri, userId, "id.jpg", session.access_token);
 
-      const { error: insertError } = await supabase.from("scouts").insert({
+      // Upsert, not insert: a first-time applicant has no existing row
+      // (plain insert), but a resubmission after rejection needs to
+      // update the same row rather than collide on the profile_id
+      // primary key. Explicitly resets verification_status to 'pending'
+      // — the one self-write the admin-only-columns trigger (migration
+      // 00030) allows a non-admin to make, and only from 'rejected'.
+      const { error: upsertError } = await supabase.from("scouts").upsert({
         profile_id: userId,
         matric_number: matricNumber,
         selfie_url: selfiePath,
         id_photo_url: idPath,
+        verification_status: "pending",
       });
 
-      if (insertError) throw new Error(`[scouts insert] ${insertError.message}`);
+      if (upsertError) throw new Error(`[scouts upsert] ${upsertError.message}`);
 
       await AsyncStorage.multiRemove([PENDING_SELFIE_URI_KEY, PENDING_MATRIC_KEY]);
       router.replace("/verification-pending");

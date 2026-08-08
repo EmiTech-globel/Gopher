@@ -570,6 +570,7 @@ export type Database = {
           paystack_recipient_code: string | null
           profile_id: string
           rating_avg: number | null
+          rejection_reason: string | null
           resubmission_count: number
           selfie_url: string | null
           trust_tier: Database["public"]["Enums"]["trust_tier"]
@@ -586,6 +587,7 @@ export type Database = {
           paystack_recipient_code?: string | null
           profile_id: string
           rating_avg?: number | null
+          rejection_reason?: string | null
           resubmission_count?: number
           selfie_url?: string | null
           trust_tier?: Database["public"]["Enums"]["trust_tier"]
@@ -602,6 +604,7 @@ export type Database = {
           paystack_recipient_code?: string | null
           profile_id?: string
           rating_avg?: number | null
+          rejection_reason?: string | null
           resubmission_count?: number
           selfie_url?: string | null
           trust_tier?: Database["public"]["Enums"]["trust_tier"]
