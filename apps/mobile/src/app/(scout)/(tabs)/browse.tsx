@@ -14,9 +14,9 @@ import { supabase } from "../../../lib/supabase";
 import { AlertDialog } from "../../../components/AlertDialog";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { useActiveErrandCount } from "../../../lib/useActiveErrandCount";
+import { usePlatformSettings } from "../../../lib/usePlatformSettings";
 import { colors, fonts } from "../../../theme";
 
-const NEW_SCOUT_VALUE_CAP = 2000;
 const MAX_ACTIVE_ERRANDS = 2;
 
 interface OpenErrand {
@@ -37,6 +37,7 @@ export default function BrowseErrandsScreen() {
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const { showAlert, alertDialogProps } = useAlertDialog();
   const { count: activeErrandCount } = useActiveErrandCount();
+  const { settings } = usePlatformSettings();
   const atCapacity = activeErrandCount >= MAX_ACTIVE_ERRANDS;
 
   const loadData = useCallback(async () => {
@@ -112,7 +113,7 @@ export default function BrowseErrandsScreen() {
 
   const renderItem = ({ item }: { item: OpenErrand }) => {
     const total = item.item_budget + item.delivery_fee;
-    const isLocked = trustTier === "new" && total > NEW_SCOUT_VALUE_CAP;
+    const isLocked = trustTier === "new" && total > settings.newScoutValueCap;
 
     if (isLocked) {
       return (

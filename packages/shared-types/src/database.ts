@@ -459,6 +459,33 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          charges_fee_percent: number
+          id: number
+          new_scout_value_cap: number
+          resubmission_limit: number
+          trust_tier_threshold: number
+          updated_at: string
+        }
+        Insert: {
+          charges_fee_percent?: number
+          id?: number
+          new_scout_value_cap?: number
+          resubmission_limit?: number
+          trust_tier_threshold?: number
+          updated_at?: string
+        }
+        Update: {
+          charges_fee_percent?: number
+          id?: number
+          new_scout_value_cap?: number
+          resubmission_limit?: number
+          trust_tier_threshold?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

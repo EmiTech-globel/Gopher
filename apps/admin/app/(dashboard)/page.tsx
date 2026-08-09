@@ -1,11 +1,6 @@
 import { AlertTriangle, CheckCircle2, Clock, ListChecks, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
-// Matches the 18% Charges Fee / 82% Commission split already used by
-// generate_weekly_payout_batches() in 00016_payout_batch_job.sql — kept
-// in sync with that migration's math rather than introduced fresh here.
-const CHARGES_FEE_RATE = 0.18;
-
 function startOfTodayUTC() {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
@@ -28,6 +23,7 @@ export default async function OverviewPage() {
     { count: pendingVerificationsCount },
     { count: openDisputesCount },
     { data: confirmedThisWeek },
+    { data: settingsRow },
   ] = await Promise.all([
     supabase
       .from("errands")
@@ -51,10 +47,12 @@ export default async function OverviewPage() {
       .select("delivery_fee")
       .eq("status", "confirmed")
       .gte("confirmed_at", startOfWeekUTC()),
+    supabase.from("platform_settings").select("charges_fee_percent").eq("id", 1).single(),
   ]);
 
+  const chargesFeeRate = Number(settingsRow?.charges_fee_percent ?? 18) / 100;
   const chargesFeeThisWeek = (confirmedThisWeek ?? []).reduce(
-    (sum, row) => sum + Number(row.delivery_fee) * CHARGES_FEE_RATE,
+    (sum, row) => sum + Number(row.delivery_fee) * chargesFeeRate,
     0
   );
 
@@ -89,7 +87,7 @@ export default async function OverviewPage() {
       label: "This week's Charges Fee",
       value: `₦${chargesFeeThisWeek.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       icon: Wallet,
-      hint: "18% of delivery fees, confirmed errands since Monday",
+      hint: `${(chargesFeeRate * 100).toFixed(0)}% of delivery fees, confirmed errands since Monday`,
     },
   ];
 

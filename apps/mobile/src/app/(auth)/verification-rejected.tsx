@@ -3,16 +3,17 @@ import { View, Text, Linking, ActivityIndicator, StyleSheet } from "react-native
 import { router } from "expo-router";
 import { IconX } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
+import { usePlatformSettings } from "../../lib/usePlatformSettings";
 import { AuthScreenContainer, AuthButton } from "../../components/auth";
 import { colors, fonts } from "../../theme";
 
 const SUPPORT_EMAIL = "support@gopher.ng";
-const RESUBMISSION_LIMIT = 3;
 
 export default function VerificationRejectedScreen() {
   const [loading, setLoading] = useState(true);
   const [reason, setReason] = useState<string | null>(null);
   const [resubmissionCount, setResubmissionCount] = useState(0);
+  const { settings } = usePlatformSettings();
 
   useEffect(() => {
     async function load() {
@@ -32,7 +33,7 @@ export default function VerificationRejectedScreen() {
     load();
   }, []);
 
-  const attemptsRemaining = RESUBMISSION_LIMIT - resubmissionCount;
+  const attemptsRemaining = settings.resubmissionLimit - resubmissionCount;
   const canResubmit = attemptsRemaining > 0;
 
   return (
@@ -57,12 +58,12 @@ export default function VerificationRejectedScreen() {
 
           {canResubmit ? (
             <Text style={styles.attemptsText}>
-              You have {attemptsRemaining} of {RESUBMISSION_LIMIT} resubmission
+              You have {attemptsRemaining} of {settings.resubmissionLimit} resubmission
               {attemptsRemaining === 1 ? "" : "s"} remaining.
             </Text>
           ) : (
             <Text style={styles.attemptsText}>
-              You've used all {RESUBMISSION_LIMIT} resubmission attempts. Please contact admin
+              You've used all {settings.resubmissionLimit} resubmission attempts. Please contact admin
               directly to proceed.
             </Text>
           )}
