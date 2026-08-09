@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,10 +25,6 @@ export default function LoginPage() {
       setErrorMessage(error.message);
       return;
     }
-
-    // Middleware re-checks the admins table on the next request and
-    // redirects to /unauthorized if this account isn't one — this
-    // router.refresh() is what triggers that re-check server-side.
     router.refresh();
   }
 
@@ -35,7 +32,19 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-xl font-semibold text-foreground">Gopher Admin</h1>
+          <div>
+          <h1 className="text-xl font-semibold text-foreground">
+            <Image
+              src="/gopher-logo.png"
+              alt="Gopher Admin"
+              width={40}
+              height={40}
+              className="mx-auto mb-2 rounded-full"
+            />
+            Gopher Admin
+          </h1>
+          </div>
+          
           <p className="mt-1 text-sm text-muted">Sign in to continue</p>
         </div>
 

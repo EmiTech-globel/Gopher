@@ -18,7 +18,7 @@ export default async function UnauthorizedPage() {
       <div className="w-full max-w-sm rounded-xl border border-border bg-surface-raised p-6 text-center shadow-sm">
         <h1 className="text-lg font-semibold text-foreground">Not authorized</h1>
         <p className="mt-2 text-sm text-muted">
-          {user?.email ?? "This account"} isn&apos;t on the Gopher admin list. If you think this
+          {user?.email ?? "This account"}  isn't on the Gopher admin list. If you think this
           is a mistake, contact whoever manages the admins table.
         </p>
         <form action={signOut} className="mt-5">

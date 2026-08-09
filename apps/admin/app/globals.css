@@ -1,14 +1,5 @@
 @import "tailwindcss";
 
-/*
- * "Control room" palette per spec Section 13 — clean and functional,
- * not a consumer app. Neutral white/grey/dark base; status colors
- * (amber/red/green) are used ONLY functionally (badges, dots) and
- * never decoratively. Deliberately light and fixed (no automatic
- * dark-mode media query) — an internal ops tool should look the same
- * regardless of the admin's OS theme, so nothing shifts unexpectedly
- * mid-review.
- */
 :root {
   --background: #ffffff;
   --surface: #f9fafb;
@@ -17,10 +8,6 @@
   --foreground: #111827;
   --muted: #6b7280;
   --muted-foreground: #9ca3af;
-
-  /* Brand accent, used sparingly — active nav item, primary buttons.
-     Pulled from the mobile app's primary token so the two products
-     feel related without the admin trying to look like a consumer app. */
   --brand: #532b59;
   --brand-foreground: #ffffff;
 

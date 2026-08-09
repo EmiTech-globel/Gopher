@@ -127,6 +127,10 @@ export default async function OverviewPage() {
       <h1 className="mb-1 text-xl font-semibold text-foreground">Overview</h1>
       <p className="mb-6 text-sm text-muted">A snapshot of what's happening right now.</p>
 
+      <div className="mb-4">
+        <ErrandsActivityChart data={chartData} />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map(({ label, value, icon: Icon, hint, href }) => (
           <a
@@ -145,10 +149,6 @@ export default async function OverviewPage() {
             <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
           </a>
         ))}
-      </div>
-
-      <div className="mt-4">
-        <ErrandsActivityChart data={chartData} />
       </div>
     </div>
   );

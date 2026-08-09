@@ -38,7 +38,7 @@ export function SettingsForm({ initial }: SettingsFormProps) {
     <form onSubmit={handleSubmit} className="max-w-lg rounded-xl border border-border bg-surface-raised p-5 shadow-sm">
       <Field
         label="Charges Fee percentage"
-        hint="Gopher's cut of every delivery fee — never touches item cost. Spec default: 18%."
+        hint="Gopher's cut of every delivery fee, never touches item cost. Default: 18%."
         suffix="%"
         value={values.chargesFeePercent}
         onChange={(v) => setValues((c) => ({ ...c, chargesFeePercent: v }))}
@@ -60,7 +60,7 @@ export function SettingsForm({ initial }: SettingsFormProps) {
         step="1"
       />
       <Field
-        label="Resubmission limit"
+        label="Verification resubmission limit"
         hint="Max verification resubmission attempts before 'Contact Admin' replaces the resubmit button."
         value={values.resubmissionLimit}
         onChange={(v) => setValues((c) => ({ ...c, resubmissionLimit: v }))}

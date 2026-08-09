@@ -22,10 +22,6 @@ export default async function VerificationPage() {
     .eq("verification_status", "pending")
     .returns<PendingApplicant[]>();
 
-  // Signed URLs, not public ones — the scout-verification bucket is
-  // private (spec Section 4: "restricted, non-public, admin-only
-  // read"). is_admin() RLS already allows this read; we just need a
-  // temporary URL to actually render the image.
   const applicantsWithUrls = await Promise.all(
     (applicants ?? []).map(async (applicant) => {
       const [selfieResult, idResult] = await Promise.all([
@@ -61,7 +57,7 @@ export default async function VerificationPage() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised py-16 text-center">
           <ShieldCheck size={28} strokeWidth={1.5} className="mb-3 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">Nothing pending</p>
-          <p className="mt-1 text-xs text-muted">All caught up — no applications waiting.</p>
+          <p className="mt-1 text-xs text-muted">All caught up, no applications waiting.</p>
         </div>
       )}
 

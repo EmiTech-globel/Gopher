@@ -14,13 +14,13 @@ export default async function SettingsPage() {
     <div>
       <h1 className="mb-1 text-xl font-semibold text-foreground">Settings</h1>
       <p className="mb-6 text-sm text-muted">
-        These four values are read live by the mobile app and by database triggers —
+        These four values are read live by the mobile app and by database triggers,
         changes here take effect immediately, no deploy required.
       </p>
 
       {error && (
         <p className="rounded-lg border border-status-disputed bg-status-disputed-bg p-3 text-sm text-status-disputed">
-          Couldn&apos;t load settings: {error.message}
+          Couldn't load settings: {error.message}
         </p>
       )}
 

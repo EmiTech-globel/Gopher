@@ -55,7 +55,7 @@ export default async function PayoutsPage() {
 
       {error && (
         <p className="rounded-lg border border-status-disputed bg-status-disputed-bg p-3 text-sm text-status-disputed">
-          Couldn&apos;t load payouts: {error.message}
+          Couldn't load payouts: {error.message}
         </p>
       )}
 

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/sidebar";
 import { SignOutButton } from "@/components/sign-out-button";
+import Image from "next/image";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -9,7 +10,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen bg-surface">
       <aside className="w-56 shrink-0 border-r border-border bg-surface-raised">
-        <div className="border-b border-border px-4 py-4">
+        <div className="flex gap-2 border-b border-border px-4 py-4 items-center">
+          <Image 
+          width={36}
+          height={36}
+          src="/gopher-logo.png"
+          alt="Gopher Logo"
+          className="rounded-full"
+          />
           <span className="text-sm font-semibold text-foreground">Gopher Admin</span>
         </div>
         <Sidebar />
