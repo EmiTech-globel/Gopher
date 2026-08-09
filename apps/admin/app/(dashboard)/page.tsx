@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle2, Clock, ListChecks, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { ErrandsActivityChart } from "@/components/errands-activity-chart";
 
 function startOfTodayUTC() {
   const now = new Date();
@@ -14,6 +15,11 @@ function startOfWeekUTC() {
   return monday.toISOString();
 }
 
+function daysAgoUTC(days: number) {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days)).toISOString();
+}
+
 export default async function OverviewPage() {
   const supabase = await createClient();
 
@@ -24,6 +30,7 @@ export default async function OverviewPage() {
     { count: openDisputesCount },
     { data: confirmedThisWeek },
     { data: settingsRow },
+    { data: confirmedLast14Days },
   ] = await Promise.all([
     supabase
       .from("errands")
@@ -48,6 +55,11 @@ export default async function OverviewPage() {
       .eq("status", "confirmed")
       .gte("confirmed_at", startOfWeekUTC()),
     supabase.from("platform_settings").select("charges_fee_percent").eq("id", 1).single(),
+    supabase
+      .from("errands")
+      .select("confirmed_at")
+      .eq("status", "confirmed")
+      .gte("confirmed_at", daysAgoUTC(13)),
   ]);
 
   const chargesFeeRate = Number(settingsRow?.charges_fee_percent ?? 18) / 100;
@@ -55,6 +67,25 @@ export default async function OverviewPage() {
     (sum, row) => sum + Number(row.delivery_fee) * chargesFeeRate,
     0
   );
+
+  // Bucket into a fixed 14-day window so days with zero completions
+  // still show up as a bar at 0, rather than silently disappearing —
+  // a gap in the chart should mean "nothing happened," not "no data."
+  const dailyCounts = new Map<string, number>();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(daysAgoUTC(i));
+    const key = d.toISOString().slice(0, 10);
+    dailyCounts.set(key, 0);
+  }
+  (confirmedLast14Days ?? []).forEach((row) => {
+    if (!row.confirmed_at) return;
+    const key = row.confirmed_at.slice(0, 10);
+    if (dailyCounts.has(key)) dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
+  });
+  const chartData = Array.from(dailyCounts.entries()).map(([dateKey, completed]) => ({
+    date: new Date(dateKey).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" }),
+    completed,
+  }));
 
   const stats = [
     {
@@ -114,6 +145,10 @@ export default async function OverviewPage() {
             <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
           </a>
         ))}
+      </div>
+
+      <div className="mt-4">
+        <ErrandsActivityChart data={chartData} />
       </div>
     </div>
   );
