@@ -12,7 +12,7 @@ export function ErrandsActivityChart({ data }: { data: DailyPoint[] }) {
     <div className="rounded-xl border border-border bg-surface-raised p-5 shadow-sm">
       <p className="mb-4 text-sm font-medium text-foreground">Errands completed per day (last 14 days)</p>
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+        <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
           <XAxis
             dataKey="date"
@@ -22,10 +22,11 @@ export function ErrandsActivityChart({ data }: { data: DailyPoint[] }) {
           />
           <YAxis
             allowDecimals={false}
+            domain={[0, (dataMax: number) => Math.max(5, dataMax + 1)]}
             tick={{ fontSize: 11, fill: "#9ca3af" }}
             axisLine={false}
             tickLine={false}
-            width={28}
+            width={32}
           />
           <Tooltip
             cursor={{ fill: "#f9fafb" }}
