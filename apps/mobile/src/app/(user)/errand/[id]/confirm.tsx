@@ -7,6 +7,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { IconCheck, IconStarFilled, IconStar, IconAlertTriangle } from "@tabler/icons-react-native";
 import { supabase } from "../../../../lib/supabase";
 import { AlertDialog } from "../../../../components/AlertDialog";
+import { releaseItemCostIfApplicable } from "../../../../lib/releaseItemCost";
 import { useAlertDialog } from "../../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../../theme";
 
@@ -70,6 +71,13 @@ export default function DeliveryConfirmationScreen() {
       return;
     }
 
+    // If the scout is new-tier, this is what actually reimburses the
+    // item-cost they fronted, per spec Section 5. No-ops harmlessly
+    // for trusted-tier scouts (they already got paid on accept).
+    // Fires regardless of how the rating below goes — reimbursement
+    // shouldn't be held hostage by an unrelated rating failure.
+    const { warning: itemCostWarning } = await releaseItemCostIfApplicable(errandId);
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.id) {
       setSubmitting(false);
@@ -86,14 +94,18 @@ export default function DeliveryConfirmationScreen() {
     });
 
     setSubmitting(false);
-    if (ratingError) {
-      // Delivery is already confirmed regardless of whether the rating
-      // saved — navigation waits until the user's actually seen this,
-      // since our themed dialog (unlike the native one) unmounts if we
-      // navigate away first.
+
+    const issues: string[] = [];
+    if (ratingError) issues.push(`your rating couldn't be saved (${ratingError.message})`);
+    if (itemCostWarning) issues.push(`item-cost payout needs attention (${itemCostWarning})`);
+
+    if (issues.length > 0) {
+      // Delivery is already confirmed regardless of these — navigation
+      // waits until the user's actually seen this, since our themed
+      // dialog (unlike the native one) unmounts if we navigate away first.
       showAlert(
         "Delivery confirmed",
-        `But your rating couldn't be saved: ${ratingError.message}`,
+        `But ${issues.join(", and ")}.`,
         { onDismiss: () => router.replace("/(user)/home") }
       );
       return;

@@ -15,6 +15,7 @@ import { AlertDialog } from "../../../components/AlertDialog";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { useActiveErrandCount } from "../../../lib/useActiveErrandCount";
 import { usePlatformSettings } from "../../../lib/usePlatformSettings";
+import { releaseItemCostIfApplicable } from "../../../lib/releaseItemCost";
 import { colors, fonts } from "../../../theme";
 
 const MAX_ACTIVE_ERRANDS = 2;
@@ -106,6 +107,14 @@ export default function BrowseErrandsScreen() {
       showAlert("Too late", "Another scout already accepted this errand.");
       loadData();
       return;
+    }
+
+    // If this scout is trusted-tier, this is what actually pays out
+    // the item-cost immediately, per spec Section 5. No-ops harmlessly
+    // for new-tier scouts (they get reimbursed on confirm instead).
+    const { warning } = await releaseItemCostIfApplicable(errand.id);
+    if (warning) {
+      showAlert("Errand accepted", `But item-cost couldn't be released yet: ${warning}`);
     }
 
     router.push(`/(scout)/errand/${errand.id}`);

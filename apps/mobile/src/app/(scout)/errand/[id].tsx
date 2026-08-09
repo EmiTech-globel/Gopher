@@ -12,6 +12,7 @@ import { supabase } from "../../../lib/supabase";
 import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { AlertDialog } from "../../../components/AlertDialog";
+import { releaseItemCostIfApplicable } from "../../../lib/releaseItemCost";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../theme";
 import { getCounterpartPhone, revealMyPhone, autoRevealIfDefaultOn } from "../../../lib/phoneReveal";
@@ -162,6 +163,12 @@ export default function ScoutErrandDetailScreen() {
     setUpdating(false);
     if (error) { showAlert("Couldn't accept errand", error.message); return; }
     if (!data) { showAlert("Too late", "Another scout already accepted this errand."); loadData(); return; }
+
+    const { warning } = await releaseItemCostIfApplicable(errand.id);
+    if (warning) {
+      showAlert("Errand accepted", `But item-cost couldn't be released yet: ${warning}`);
+    }
+
     loadData();
   }
 
