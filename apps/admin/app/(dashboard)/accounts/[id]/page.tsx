@@ -156,7 +156,8 @@ function ErrandHistoryTable({
   return (
     <div className="mb-4 overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
       <p className="border-b border-border px-4 py-2.5 text-sm font-semibold text-foreground">{title}</p>
-      <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
         <tbody>
           {errands.map((errand) => (
             <tr key={errand.id} className="border-b border-border last:border-0">
@@ -170,6 +171,7 @@ function ErrandHistoryTable({
           ))}
         </tbody>
       </table>
+          </div>
     </div>
   );
 }

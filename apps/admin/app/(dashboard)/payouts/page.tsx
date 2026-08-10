@@ -72,7 +72,8 @@ export default async function PayoutsPage() {
       {pending.length > 0 && (
         <div className="mb-6 overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
           <p className="border-b border-border px-4 py-2.5 text-sm font-semibold text-foreground">Pending</p>
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-surface text-xs text-muted-foreground">
                 <th className="px-4 py-2.5 font-medium">Scout</th>
@@ -105,13 +106,15 @@ export default async function PayoutsPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {paid.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
           <p className="border-b border-border px-4 py-2.5 text-sm font-semibold text-foreground">Paid</p>
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-surface text-xs text-muted-foreground">
                 <th className="px-4 py-2.5 font-medium">Scout</th>
@@ -133,6 +136,7 @@ export default async function PayoutsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

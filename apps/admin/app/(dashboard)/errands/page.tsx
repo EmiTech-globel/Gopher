@@ -86,7 +86,8 @@ export default async function ErrandsPage({
 
       {!error && (errands ?? []).length > 0 && (
         <div className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-surface text-xs text-muted-foreground">
                 <th className="px-4 py-2.5 font-medium">Item</th>
@@ -114,6 +115,7 @@ export default async function ErrandsPage({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
