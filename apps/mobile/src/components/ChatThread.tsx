@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IconSend } from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
+import { markErrandNotificationsRead } from "../lib/notificationsReadState";
 import { colors, fonts } from "../theme";
 
 interface ChatMessage {
@@ -61,11 +62,7 @@ export function ChatThread({ errandId }: { errandId: string }) {
 
     // Mark all unread notifications for this errand as read so the badge
     // and list stay in sync — the user is now actively viewing the chat.
-    supabase.from("notifications")
-      .update({ read: true })
-      .eq("user_id", currentUserId)
-      .eq("errand_id", errandId)
-      .eq("read", false);
+    markErrandNotificationsRead(errandId);
 
     const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
     const hide = Keyboard.addListener("keyboardDidHide", () => {

@@ -11,6 +11,7 @@ import {
   IconReceipt,
 } from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
+import { markAllNotificationsRead } from "../lib/notificationsReadState";
 import { colors, fonts } from "../theme";
 
 interface NotificationRow {
@@ -25,6 +26,7 @@ interface NotificationRow {
 
 export function NotificationsList({ errandBasePath }: { errandBasePath: string }) {
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
+  const [markingAll, setMarkingAll] = useState(false);
 
   const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -39,6 +41,16 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
   }, []);
 
   useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
+
+  const hasUnread = notifications.some((n) => !n.read);
+
+  async function handleMarkAllRead() {
+    if (!hasUnread || markingAll) return;
+    setMarkingAll(true);
+    await markAllNotificationsRead();
+    setNotifications((current) => current.map((n) => ({ ...n, read: true })));
+    setMarkingAll(false);
+  }
 
   async function handlePress(item: NotificationRow) {
     if (!item.read) {
@@ -85,7 +97,11 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
             <IconArrowLeft size={28} color={colors.textSecondary} strokeWidth={1.75} />
           </Pressable>
           <Text style={styles.headerTitle}>Notifications</Text>
-          <View style={{ width: 20 }} />
+          <Pressable onPress={handleMarkAllRead} disabled={!hasUnread || markingAll} hitSlop={8}>
+            <Text style={[styles.markAllText, (!hasUnread || markingAll) && styles.markAllTextDisabled]}>
+              Mark all read
+            </Text>
+          </Pressable>
         </View>
       }
       renderItem={({ item }) => (
@@ -115,6 +131,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 140 },
  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
 headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
+  markAllText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.accent },
+  markAllTextDisabled: { color: colors.textMuted, opacity: 0.6 },
   row: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceRaised, borderRadius: 14, padding: 12, marginBottom: 10 },
   rowUnread: { borderWidth: StyleSheet.hairlineWidth, borderColor: colors.accent },
   iconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceElevated, alignItems: "center", justifyContent: "center", marginRight: 12 },

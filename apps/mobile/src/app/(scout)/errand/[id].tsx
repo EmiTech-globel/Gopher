@@ -13,6 +13,7 @@ import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { AlertDialog } from "../../../components/AlertDialog";
 import { releaseItemCostIfApplicable } from "../../../lib/releaseItemCost";
+import { markErrandNotificationsRead } from "../../../lib/notificationsReadState";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { colors, fonts } from "../../../theme";
 import { getCounterpartPhone, revealMyPhone, autoRevealIfDefaultOn } from "../../../lib/phoneReveal";
@@ -64,6 +65,7 @@ export default function ScoutErrandDetailScreen() {
 
     if (errandRow) {
       setErrand(errandRow);
+      markErrandNotificationsRead(id);
       const { data: profile } = await supabase
         .from("public_profiles")
         .select("full_name")

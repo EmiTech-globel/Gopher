@@ -12,6 +12,7 @@ import { EvidenceViewerModal } from "../../../components/EvidenceViewerModal";
 import { AlertDialog } from "../../../components/AlertDialog";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { getSignedEvidenceUrl } from "../../../lib/signedUrl";
+import { markErrandNotificationsRead } from "../../../lib/notificationsReadState";
 import { colors, fonts } from "../../../theme";
 import { initiateBalanceTopupPayment } from "../../../lib/paystack";
 import { autoRevealIfDefaultOn, getCounterpartPhone, revealMyPhone } from "../../../lib/phoneReveal";
@@ -95,6 +96,7 @@ export default function TrackErrandScreen() {
     if (!id) return;
     const { data: errandRow } = await supabase.from("errands").select("*").eq("id", id).single();
     setErrand(errandRow ?? null);
+    markErrandNotificationsRead(id);
 
     if (errandRow?.scout_id) {
       const [{ data: profile }, { data: scout }] = await Promise.all([
