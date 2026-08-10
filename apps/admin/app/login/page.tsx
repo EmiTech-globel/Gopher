@@ -37,8 +37,8 @@ export default function LoginPage() {
             <Image
               src="/gopher-logo.png"
               alt="Gopher Admin"
-              width={40}
-              height={40}
+              width={50}
+              height={50}
               className="mx-auto mb-2 rounded-full"
             />
             Gopher Admin

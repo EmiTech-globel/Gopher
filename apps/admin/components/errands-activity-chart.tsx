@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface DailyPoint {
-  date: string; // e.g. "Aug 5"
+  date: string;
   completed: number;
 }
 
@@ -22,7 +22,7 @@ export function ErrandsActivityChart({ data }: { data: DailyPoint[] }) {
           />
           <YAxis
             allowDecimals={false}
-            domain={[0, (dataMax: number) => Math.max(5, dataMax + 1)]}
+            domain={[0, (dataMax: number) => Math.max(4, dataMax + 1)]}
             tick={{ fontSize: 11, fill: "#9ca3af" }}
             axisLine={false}
             tickLine={false}

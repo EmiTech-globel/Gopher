@@ -9,6 +9,9 @@ import {
   IconCoin,
   IconX,
   IconReceipt,
+  IconShieldCheck,
+  IconShieldX,
+  IconWallet,
 } from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
 import { markAllNotificationsRead } from "../lib/notificationsReadState";
@@ -81,6 +84,9 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
       case "balance_request_created":
       case "balance_request_approved": return <IconCoin {...props} />;
       case "proof_submitted": return <IconReceipt {...props} />;
+      case "verification_approved": return <IconShieldCheck {...props} />;
+      case "verification_rejected": return <IconShieldX {...props} color={colors.error} />;
+      case "payout_sent": return <IconWallet {...props} />;
       default: return <IconMessageCircle {...props} />;
     }
   }
@@ -106,7 +112,7 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
       }
       renderItem={({ item }) => (
         <Pressable style={[styles.row, !item.read && styles.rowUnread]} onPress={() => handlePress(item)}>
-          <View style={[styles.iconCircle, item.type === "errand_cancelled" && styles.iconCircleError]}>
+          <View style={[styles.iconCircle, (item.type === "errand_cancelled" || item.type === "verification_rejected") && styles.iconCircleError]}>
             <NotifIcon type={item.type} />
           </View>
           <View style={styles.rowContent}>
@@ -129,8 +135,8 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surfaceBase },
   content: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 140 },
- header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
-headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
+  headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
   markAllText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.accent },
   markAllTextDisabled: { color: colors.textMuted, opacity: 0.6 },
   row: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceRaised, borderRadius: 14, padding: 12, marginBottom: 10 },

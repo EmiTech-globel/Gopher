@@ -1,0 +1,211 @@
+From 9412e3af82106ad650e1a0a9443417046a7aeab6 Mon Sep 17 00:00:00 2001
+From: Claude <claude@local>
+Date: Mon, 10 Aug 2026 08:29:13 +0000
+Subject: [PATCH] Notifications: mark-all-as-read button + auto-clear on errand
+ status view
+
+Chat already cleared its own notifications on open (ChatThread had an
+inline fire-and-forget update) -- confirmed by reading the file
+closely, that half of the report was already working. The other half
+wasn't: neither errand detail screen ((user) Track Errand or (scout)
+Errand Detail) ever marked status-change notifications
+(errand_accepted, errand_delivered, errand_confirmed, balance_request_*,
+proof_submitted, etc.) as read, even when the person was actively
+looking at that exact status on screen.
+
+- lib/notificationsReadState.ts: markErrandNotificationsRead(errandId)
+  and markAllNotificationsRead(), shared by every call site instead of
+  each screen reimplementing the same update() call
+- ChatThread.tsx: now calls the shared helper instead of its own
+  inline duplicate
+- Both errand detail screens: call markErrandNotificationsRead on
+  every loadData() run, which useFocusEffect already re-triggers on
+  every visit, not just first mount -- so revisiting an errand you'd
+  already seen the status of clears it every time, not only once
+- NotificationsList.tsx: 'Mark all read' button in the header, disabled
+  (dimmed) when there's nothing unread to clear
+
+Verified with tsc --noEmit -- the three warnings that showed up in
+ChatThread.tsx are pre-existing implicit-any lines untouched by this
+7-line diff, confirmed by diffing against HEAD.
+---
+ apps/mobile/src/app/(scout)/errand/[id].tsx   |  2 +
+ apps/mobile/src/app/(user)/errand/[id].tsx    |  2 +
+ apps/mobile/src/components/ChatThread.tsx     |  7 +---
+ .../src/components/NotificationsList.tsx      | 20 +++++++++-
+ apps/mobile/src/lib/notificationsReadState.ts | 39 +++++++++++++++++++
+ 5 files changed, 64 insertions(+), 6 deletions(-)
+ create mode 100644 apps/mobile/src/lib/notificationsReadState.ts
+
+diff --git a/apps/mobile/src/app/(scout)/errand/[id].tsx b/apps/mobile/src/app/(scout)/errand/[id].tsx
+index 16155c3..6f0fa77 100644
+--- a/apps/mobile/src/app/(scout)/errand/[id].tsx
++++ b/apps/mobile/src/app/(scout)/errand/[id].tsx
+@@ -13,6 +13,7 @@ import { ChatThread } from "../../../components/ChatThread";
+ import { ConfirmDialog } from "../../../components/ConfirmDialog";
+ import { AlertDialog } from "../../../components/AlertDialog";
+ import { releaseItemCostIfApplicable } from "../../../lib/releaseItemCost";
++import { markErrandNotificationsRead } from "../../../lib/notificationsReadState";
+ import { useAlertDialog } from "../../../lib/useAlertDialog";
+ import { colors, fonts } from "../../../theme";
+ import { getCounterpartPhone, revealMyPhone, autoRevealIfDefaultOn } from "../../../lib/phoneReveal";
+@@ -64,6 +65,7 @@ export default function ScoutErrandDetailScreen() {
+ 
+     if (errandRow) {
+       setErrand(errandRow);
++      markErrandNotificationsRead(id);
+       const { data: profile } = await supabase
+         .from("public_profiles")
+         .select("full_name")
+diff --git a/apps/mobile/src/app/(user)/errand/[id].tsx b/apps/mobile/src/app/(user)/errand/[id].tsx
+index b04132d..1cb4d65 100644
+--- a/apps/mobile/src/app/(user)/errand/[id].tsx
++++ b/apps/mobile/src/app/(user)/errand/[id].tsx
+@@ -12,6 +12,7 @@ import { EvidenceViewerModal } from "../../../components/EvidenceViewerModal";
+ import { AlertDialog } from "../../../components/AlertDialog";
+ import { useAlertDialog } from "../../../lib/useAlertDialog";
+ import { getSignedEvidenceUrl } from "../../../lib/signedUrl";
++import { markErrandNotificationsRead } from "../../../lib/notificationsReadState";
+ import { colors, fonts } from "../../../theme";
+ import { initiateBalanceTopupPayment } from "../../../lib/paystack";
+ import { autoRevealIfDefaultOn, getCounterpartPhone, revealMyPhone } from "../../../lib/phoneReveal";
+@@ -95,6 +96,7 @@ export default function TrackErrandScreen() {
+     if (!id) return;
+     const { data: errandRow } = await supabase.from("errands").select("*").eq("id", id).single();
+     setErrand(errandRow ?? null);
++    markErrandNotificationsRead(id);
+ 
+     if (errandRow?.scout_id) {
+       const [{ data: profile }, { data: scout }] = await Promise.all([
+diff --git a/apps/mobile/src/components/ChatThread.tsx b/apps/mobile/src/components/ChatThread.tsx
+index bc8048c..6aaf691 100644
+--- a/apps/mobile/src/components/ChatThread.tsx
++++ b/apps/mobile/src/components/ChatThread.tsx
+@@ -13,6 +13,7 @@ import {
+ import { useSafeAreaInsets } from "react-native-safe-area-context";
+ import { IconSend } from "@tabler/icons-react-native";
+ import { supabase } from "../lib/supabase";
++import { markErrandNotificationsRead } from "../lib/notificationsReadState";
+ import { colors, fonts } from "../theme";
+ 
+ interface ChatMessage {
+@@ -61,11 +62,7 @@ export function ChatThread({ errandId }: { errandId: string }) {
+ 
+     // Mark all unread notifications for this errand as read so the badge
+     // and list stay in sync — the user is now actively viewing the chat.
+-    supabase.from("notifications")
+-      .update({ read: true })
+-      .eq("user_id", currentUserId)
+-      .eq("errand_id", errandId)
+-      .eq("read", false);
++    markErrandNotificationsRead(errandId);
+ 
+     const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
+     const hide = Keyboard.addListener("keyboardDidHide", () => {
+diff --git a/apps/mobile/src/components/NotificationsList.tsx b/apps/mobile/src/components/NotificationsList.tsx
+index 7e0ae46..9dd8e07 100644
+--- a/apps/mobile/src/components/NotificationsList.tsx
++++ b/apps/mobile/src/components/NotificationsList.tsx
+@@ -11,6 +11,7 @@ import {
+   IconReceipt,
+ } from "@tabler/icons-react-native";
+ import { supabase } from "../lib/supabase";
++import { markAllNotificationsRead } from "../lib/notificationsReadState";
+ import { colors, fonts } from "../theme";
+ 
+ interface NotificationRow {
+@@ -25,6 +26,7 @@ interface NotificationRow {
+ 
+ export function NotificationsList({ errandBasePath }: { errandBasePath: string }) {
+   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
++  const [markingAll, setMarkingAll] = useState(false);
+ 
+   const loadData = useCallback(async () => {
+     const { data: { user } } = await supabase.auth.getUser();
+@@ -40,6 +42,16 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
+ 
+   useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
+ 
++  const hasUnread = notifications.some((n) => !n.read);
++
++  async function handleMarkAllRead() {
++    if (!hasUnread || markingAll) return;
++    setMarkingAll(true);
++    await markAllNotificationsRead();
++    setNotifications((current) => current.map((n) => ({ ...n, read: true })));
++    setMarkingAll(false);
++  }
++
+   async function handlePress(item: NotificationRow) {
+     if (!item.read) {
+       await supabase.from("notifications").update({ read: true }).eq("id", item.id);
+@@ -85,7 +97,11 @@ export function NotificationsList({ errandBasePath }: { errandBasePath: string }
+             <IconArrowLeft size={28} color={colors.textSecondary} strokeWidth={1.75} />
+           </Pressable>
+           <Text style={styles.headerTitle}>Notifications</Text>
+-          <View style={{ width: 20 }} />
++          <Pressable onPress={handleMarkAllRead} disabled={!hasUnread || markingAll} hitSlop={8}>
++            <Text style={[styles.markAllText, (!hasUnread || markingAll) && styles.markAllTextDisabled]}>
++              Mark all read
++            </Text>
++          </Pressable>
+         </View>
+       }
+       renderItem={({ item }) => (
+@@ -115,6 +131,8 @@ const styles = StyleSheet.create({
+   content: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 140 },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 28 },
+ headerTitle: { fontFamily: fonts.headingMedium, fontSize: 18, color: colors.textPrimary },
++  markAllText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.accent },
++  markAllTextDisabled: { color: colors.textMuted, opacity: 0.6 },
+   row: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceRaised, borderRadius: 14, padding: 12, marginBottom: 10 },
+   rowUnread: { borderWidth: StyleSheet.hairlineWidth, borderColor: colors.accent },
+   iconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceElevated, alignItems: "center", justifyContent: "center", marginRight: 12 },
+diff --git a/apps/mobile/src/lib/notificationsReadState.ts b/apps/mobile/src/lib/notificationsReadState.ts
+new file mode 100644
+index 0000000..438c813
+--- /dev/null
++++ b/apps/mobile/src/lib/notificationsReadState.ts
+@@ -0,0 +1,39 @@
++import { supabase } from "./supabase";
++
++/**
++ * Marks every unread notification tied to a specific errand as read
++ * for the current user. Called when a screen showing that errand's
++ * status or chat is actively being viewed — the person has already
++ * seen the update, so there's nothing left for the badge to flag.
++ *
++ * Fire-and-forget by design: this runs alongside a screen's normal
++ * data load, and a failure here shouldn't block or error out the
++ * screen itself — worst case, a notification just stays marked
++ * unread a little longer.
++ */
++export async function markErrandNotificationsRead(errandId: string) {
++  const { data: { user } } = await supabase.auth.getUser();
++  if (!user) return;
++
++  await supabase
++    .from("notifications")
++    .update({ read: true })
++    .eq("user_id", user.id)
++    .eq("errand_id", errandId)
++    .eq("read", false);
++}
++
++/**
++ * Marks every unread notification for the current user as read —
++ * backs the "Mark all as read" action on the notifications screen.
++ */
++export async function markAllNotificationsRead() {
++  const { data: { user } } = await supabase.auth.getUser();
++  if (!user) return;
++
++  await supabase
++    .from("notifications")
++    .update({ read: true })
++    .eq("user_id", user.id)
++    .eq("read", false);
++}
+-- 
+2.43.0
+
