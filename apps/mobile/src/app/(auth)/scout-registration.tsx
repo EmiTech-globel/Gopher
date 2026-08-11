@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../../lib/supabase";
@@ -15,6 +16,17 @@ import { colors } from "../../theme";
 export const PENDING_MATRIC_KEY = "gopher.pendingMatricNumber";
 
 export default function ScoutRegistrationScreen() {
+  // null while checking, then true/false. An existing logged-in User
+  // tapping "Become a Scout" from Profile already has an account,
+  // a verified email, and has already accepted Terms & Conditions
+  // (routeAfterAuth gates that for every screen past login) — asking
+  // them to fill out full name/email/password again and re-verify an
+  // OTP was not just redundant, it was actively broken: Supabase
+  // deliberately doesn't send a confirmation email for signUp() on an
+  // already-registered, already-confirmed address (anti-enumeration
+  // protection), so that OTP would silently never arrive.
+  const [existingSession, setExistingSession] = useState<boolean | null>(null);
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -25,6 +37,13 @@ export default function ScoutRegistrationScreen() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showOtp, setShowOtp] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setExistingSession(!!session);
+    })();
+  }, []);
 
   async function handleRegister() {
     setErrorMessage(null);
@@ -76,6 +95,46 @@ export default function ScoutRegistrationScreen() {
     setShowOtp(true);
   }
 
+  async function handleUpgradeExistingUser() {
+    setErrorMessage(null);
+
+    if (!matricNumber.trim() || !department.trim()) {
+      setErrorMessage("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      setErrorMessage("Your session expired. Please log in again.");
+      router.replace("/login");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ department: department.trim() })
+      .eq("id", user.id);
+
+    setLoading(false);
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    await AsyncStorage.setItem(PENDING_MATRIC_KEY, matricNumber.trim());
+    router.push("/selfie-capture");
+  }
+
+  if (existingSession === null) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.surfaceBase, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
+    );
+  }
+
   if (showOtp) {
     return (
       <AuthScreenContainer
@@ -93,6 +152,32 @@ export default function ScoutRegistrationScreen() {
             router.push({ pathname: "/terms-and-conditions", params: { next: "/selfie-capture" } })
           }
         />
+      </AuthScreenContainer>
+    );
+  }
+
+  if (existingSession) {
+    return (
+      <AuthScreenContainer title="Become a Scout" subtitle="Run errands for other students and earn weekly">
+        <AuthTextInput
+          label="Matric number"
+          icon={<IconId size={14} color={colors.textSecondary} strokeWidth={1.75} />}
+          placeholder="M.25/ND/PEG/*****"
+          autoCapitalize="characters"
+          value={matricNumber}
+          onChangeText={setMatricNumber}
+        />
+        <AuthTextInput
+          label="Department"
+          icon={<IconBuilding size={14} color={colors.textSecondary} strokeWidth={1.75} />}
+          placeholder="Department"
+          value={department}
+          onChangeText={setDepartment}
+        />
+
+        <ErrorText message={errorMessage} />
+
+        <AuthButton label="Continue" onPress={handleUpgradeExistingUser} loading={loading} />
       </AuthScreenContainer>
     );
   }
