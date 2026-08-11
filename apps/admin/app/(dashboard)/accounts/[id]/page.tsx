@@ -3,6 +3,7 @@ import { ArrowLeft, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/status-badge";
 import { AccountControls } from "@/components/account-controls";
+import { AccountAccessControls } from "@/components/account-access-controls";
 
 const STATUS_TONE: Record<string, "pending" | "resolved" | "disputed" | "neutral"> = {
   open: "pending", accepted: "pending", purchased: "pending", delivered: "pending",
@@ -18,7 +19,7 @@ export default async function AccountDetailPage({
   const supabase = await createClient();
 
   const [{ data: profile }, { data: scout }] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, email, phone, department, created_at").eq("id", id).maybeSingle(),
+    supabase.from("profiles").select("id, full_name, email, phone, department, created_at, access_revoked_at, access_revoked_reason").eq("id", id).maybeSingle(),
     supabase
       .from("scouts")
       .select("profile_id, matric_number, trust_tier, verification_status, completed_errands_count, rating_avg, banned_at, ban_reason, mercy_period_ends_at")
@@ -90,6 +91,17 @@ export default async function AccountDetailPage({
               )}
             </div>
 
+            {profile.access_revoked_at && (
+              <div className="mt-4 rounded-lg border border-status-disputed bg-status-disputed-bg p-3">
+                <p className="text-xs font-medium text-status-disputed">
+                  Access revoked {new Date(profile.access_revoked_at).toLocaleDateString()}
+                </p>
+                {profile.access_revoked_reason && (
+                  <p className="mt-1 text-xs text-status-disputed">{profile.access_revoked_reason}</p>
+                )}
+              </div>
+            )}
+
             {scout?.banned_at && (
               <div className="mt-4 rounded-lg border border-status-disputed bg-status-disputed-bg p-3">
                 <p className="text-xs font-medium text-status-disputed">
@@ -140,6 +152,7 @@ export default async function AccountDetailPage({
               isBanned={!!scout.banned_at}
             />
           )}
+          <AccountAccessControls profileId={id} isRevoked={!!profile.access_revoked_at} />
         </div>
       </div>
     </div>

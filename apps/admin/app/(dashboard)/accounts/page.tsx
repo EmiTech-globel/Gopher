@@ -7,6 +7,7 @@ interface ProfileRow {
   full_name: string;
   email: string;
   department: string | null;
+  access_revoked_at: string | null;
 }
 
 interface ScoutRow {
@@ -27,7 +28,7 @@ export default async function AccountsPage({
 
   let profileQuery = supabase
     .from("profiles")
-    .select("id, full_name, email, department")
+    .select("id, full_name, email, department, access_revoked_at")
     .order("full_name")
     .limit(50);
 
@@ -106,7 +107,11 @@ export default async function AccountsPage({
                     <td className="px-4 py-2.5 text-muted capitalize">{scout?.trust_tier ?? "—"}</td>
                     <td className="px-4 py-2.5 text-muted">{scout?.rating_avg ? scout.rating_avg.toFixed(1) : "—"}</td>
                     <td className="px-4 py-2.5">
-                      {scout?.banned_at ? (
+                      {profile.access_revoked_at ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-status-disputed">
+                          <ShieldOff size={13} strokeWidth={1.75} /> Access revoked
+                        </span>
+                      ) : scout?.banned_at ? (
                         <span className="inline-flex items-center gap-1 text-xs text-status-disputed">
                           <ShieldOff size={13} strokeWidth={1.75} /> Banned
                         </span>

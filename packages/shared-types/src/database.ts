@@ -488,6 +488,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_revoked_at: string | null
+          access_revoked_reason: string | null
           avatar_url: string | null
           created_at: string
           department: string | null
@@ -498,6 +500,8 @@ export type Database = {
           reveal_phone_by_default: boolean
         }
         Insert: {
+          access_revoked_at?: string | null
+          access_revoked_reason?: string | null
           avatar_url?: string | null
           created_at?: string
           department?: string | null
@@ -508,6 +512,8 @@ export type Database = {
           reveal_phone_by_default?: boolean
         }
         Update: {
+          access_revoked_at?: string | null
+          access_revoked_reason?: string | null
           avatar_url?: string | null
           created_at?: string
           department?: string | null
