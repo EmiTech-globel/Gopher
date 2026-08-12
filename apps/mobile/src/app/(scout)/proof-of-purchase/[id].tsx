@@ -48,6 +48,18 @@ export default function ProofOfPurchaseScreen() {
         const response = await fetch(uri);
         const arrayBuffer = await response.arrayBuffer();
         const path = `${id}/${filename}`;
+
+        // Makes a retry after a partial failure (e.g. item.jpg
+        // uploaded fine, receipt.jpg or the status update afterward
+        // failed) actually work instead of hitting "already exists"
+        // on the item.jpg re-upload — this screen's own error
+        // handling explicitly allows exactly that retry (stays
+        // mounted, re-enables Submit).
+        const { error: removeError } = await supabase.storage.from("proof-of-purchase").remove([path]);
+        if (removeError && !/not.?found/i.test(removeError.message)) {
+          throw new Error(`[storage:${filename} cleanup] ${removeError.message}`);
+        }
+
         const { error } = await supabase.storage
           .from("proof-of-purchase")
           .upload(path, arrayBuffer, { contentType: "image/jpeg", upsert: false });
