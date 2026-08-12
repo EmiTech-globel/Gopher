@@ -26,7 +26,14 @@ async function uploadPhoto(
     { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
   );
 
-  await scopedClient.storage.from("scout-verification").remove([path]);
+  const { error: removeError } = await scopedClient.storage.from("scout-verification").remove([path]);
+  // Ignore "not found" — expected on a first-time submission, there's
+  // nothing to remove yet. Any other failure (e.g. RLS denying it)
+  // should surface clearly here rather than silently proceeding into
+  // a confusing "already exists" from the upload call below.
+  if (removeError && !/not.?found/i.test(removeError.message)) {
+    throw new Error(`[storage:${filename} cleanup] ${removeError.message}`);
+  }
 
   const { error } = await scopedClient.storage
     .from("scout-verification")
