@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../../lib/supabase";
 import {
@@ -16,6 +16,18 @@ import { colors } from "../../theme";
 export const PENDING_MATRIC_KEY = "gopher.pendingMatricNumber";
 
 export default function ScoutRegistrationScreen() {
+  // create-account.tsx's "Become a Scout" link passes fresh=1 to
+  // explicitly say "treat this as a brand-new signup" — deliberately
+  // NOT inferred from session presence alone. Supabase persists
+  // sessions across app restarts, so a leftover session from earlier
+  // testing (or a previous account on a shared device) would
+  // otherwise make this screen wrongly show the short upgrade form
+  // to someone who's never actually signed up. Profile's own
+  // "Become a Scout" (no fresh param) is the only path that should
+  // ever treat an existing session as an upgrade.
+  const { fresh } = useLocalSearchParams<{ fresh?: string }>();
+  const isFreshSignup = fresh === "1";
+
   // null while checking, then true/false. An existing logged-in User
   // tapping "Become a Scout" from Profile already has an account,
   // a verified email, and has already accepted Terms & Conditions
@@ -25,7 +37,7 @@ export default function ScoutRegistrationScreen() {
   // deliberately doesn't send a confirmation email for signUp() on an
   // already-registered, already-confirmed address (anti-enumeration
   // protection), so that OTP would silently never arrive.
-  const [existingSession, setExistingSession] = useState<boolean | null>(null);
+  const [existingSession, setExistingSession] = useState<boolean | null>(isFreshSignup ? false : null);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,6 +51,14 @@ export default function ScoutRegistrationScreen() {
   const [showOtp, setShowOtp] = useState(false);
 
   useEffect(() => {
+    if (isFreshSignup) {
+      // Sign out any lingering session so a stale token from earlier
+      // testing (or a previous user on a shared device) can't bleed
+      // into this signup — e.g. confusing which account the eventual
+      // OTP verification and scouts-row insert apply to.
+      supabase.auth.signOut();
+      return;
+    }
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setExistingSession(!!session);

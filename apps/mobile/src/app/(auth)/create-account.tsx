@@ -135,7 +135,7 @@ export default function CreateAccountScreen() {
 
       <AuthButton label="Continue" onPress={handleCreateAccount} loading={loading} />
 
-      <Pressable onPress={() => router.push("/scout-registration")}>
+      <Pressable onPress={() => router.push({ pathname: "/scout-registration", params: { fresh: "1" } })}>
         <Text style={styles.link}>
           Want to earn instead?{" "}
           <Text style={styles.linkBold}>Become a Scout</Text>
