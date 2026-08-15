@@ -1,0 +1,107 @@
+html,
+body {
+  background: #f4eef5;
+  font-family: 'Manrope', sans-serif;
+}
+
+.flyer {
+  width: 210mm;
+  height: 297mm;
+  margin: 20px auto;
+  background: #ffffff;
+  border: 1px solid #e3d8e6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 40px;
+  text-align: center;
+}
+
+.flyer-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 24px;
+  margin-bottom: 28px;
+}
+
+.flyer h1 {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+  font-size: 56px;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.flyer .tagline {
+  font-size: 20px;
+  color: var(--deep);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.subtagline {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 380px;
+  margin-bottom: 44px;
+  line-height: 1.5;
+}
+
+.qr-wrap {
+  padding: 20px;
+  border: 3px solid var(--primary);
+  border-radius: 24px;
+  margin-bottom: 24px;
+}
+
+.qr-wrap img {
+  display: block;
+}
+
+.scan-label {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--primary);
+  margin-bottom: 44px;
+}
+
+.footer {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.footer strong {
+  color: var(--deep);
+}
+
+.print-controls {
+  text-align: center;
+  margin: 20px;
+}
+
+.print-controls button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media print {
+  .print-controls {
+    display: none;
+  }
+  html,
+  body {
+    background: #ffffff;
+  }
+  .flyer {
+    margin: 0;
+    border: none;
+  }
+}

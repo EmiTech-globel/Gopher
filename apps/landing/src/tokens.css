@@ -1,0 +1,23 @@
+:root {
+  --primary: #532B59;
+  --deep: #2E124B;
+  --accent: #D7AEAD;
+  --accent-light: #F7DAD1;
+  --surface-base: #1A0E22;
+  --surface-raised: #2A1533;
+  --surface-elevated: #382142;
+  --border-subtle: #3A2640;
+  --text-primary: #FFFFFF;
+  --text-secondary: #D7AEAD;
+  --text-muted: #8A7A8F;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+}

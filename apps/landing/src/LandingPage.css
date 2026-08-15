@@ -1,0 +1,171 @@
+.landing {
+  background: var(--surface-base);
+  background-image: radial-gradient(circle at 50% 0%, var(--deep) 0%, var(--surface-base) 60%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 60px;
+}
+
+.landing-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.landing h1 {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.accent-word {
+  color: var(--accent-light);
+}
+
+.tagline {
+  font-size: 15px;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 320px;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent-light);
+  color: var(--deep);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px 32px;
+  border-radius: 14px;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(215, 174, 173, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.download-btn:active {
+  transform: scale(0.97);
+}
+
+.download-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  text-align: center;
+}
+
+.status-line {
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 16px;
+  min-height: 18px;
+  text-align: center;
+}
+
+.card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 40px;
+}
+
+.card h2 {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.steps {
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.steps li:last-child {
+  margin-bottom: 0;
+}
+
+.steps li::before {
+  content: counter(step);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface-elevated);
+  color: var(--accent-light);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.qr-card h2 {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.qr-image {
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  margin: 12px auto 0;
+  display: block;
+}
+
+.qr-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+footer {
+  margin-top: 48px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .card,
+  .qr-card {
+    max-width: 420px;
+  }
+}
