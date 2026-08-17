@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { IconArrowLeft, IconChevronDown, IconCheck, IconSearch } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { fetchBanks, resolveAccount, createTransferRecipient, type Bank } from "../../lib/bankSetup";
 import { AlertDialog } from "../../components/AlertDialog";
 import { useAlertDialog } from "../../lib/useAlertDialog";
@@ -33,7 +34,7 @@ export default function BankSetupScreen() {
         const [banksList] = await Promise.all([fetchBanks()]);
         setBanks(banksList);
       } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : "Couldn't load banks");
+        setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Couldn't load banks");
       } finally {
         setLoadingBanks(false);
       }
@@ -68,7 +69,7 @@ export default function BankSetupScreen() {
       const result = await resolveAccount(accountNumber, selectedBank.code);
       setResolvedName(result.account_name);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Couldn't verify account");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Couldn't verify account");
       setResolvedName(null);
     } finally {
       setResolving(false);
@@ -131,7 +132,7 @@ export default function BankSetupScreen() {
       // the profile's focus refresh logic can re-fetch the latest bank details.
       router.replace("/(scout)/profile");
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Couldn't save bank details");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Couldn't save bank details");
     } finally {
       setSaving(false);
     }

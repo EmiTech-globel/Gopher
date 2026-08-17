@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { PENDING_SELFIE_URI_KEY } from "./selfie-capture";
 import { PENDING_MATRIC_KEY } from "./scout-registration";
 import { ErrorText } from "../../components/auth";
@@ -115,7 +116,7 @@ export default function IdCaptureScreen() {
       await AsyncStorage.multiRemove([PENDING_SELFIE_URI_KEY, PENDING_MATRIC_KEY]);
       router.replace("/verification-pending");
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Upload failed. Please try again.");
     } finally {
       submittingRef.current = false;
       setSubmitting(false);

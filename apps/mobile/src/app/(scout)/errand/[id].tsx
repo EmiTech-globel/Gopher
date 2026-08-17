@@ -9,6 +9,7 @@ import {
   IconShieldCheck, IconBuildingStore, IconMapPin, IconCheck, IconAlertCircle, IconAlertTriangle,
 } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../lib/friendlyError";
 import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { AlertDialog } from "../../../components/AlertDialog";
@@ -163,7 +164,7 @@ export default function ScoutErrandDetailScreen() {
       .maybeSingle();
 
     setUpdating(false);
-    if (error) { showAlert("Couldn't accept errand", error.message); return; }
+    if (error) { showAlert("Couldn't accept errand", getFriendlyErrorMessage(error)); return; }
     if (!data) { showAlert("Too late", "Another scout already accepted this errand."); loadData(); return; }
 
     const { warning } = await releaseItemCostIfApplicable(errand.id);
@@ -187,7 +188,7 @@ export default function ScoutErrandDetailScreen() {
       .update({ status: "delivered", delivered_at: new Date().toISOString() })
       .eq("id", errand.id);
     setUpdating(false);
-    if (error) { showAlert("Couldn't update", error.message); return; }
+    if (error) { showAlert("Couldn't update", getFriendlyErrorMessage(error)); return; }
     loadData();
   }
 
@@ -205,7 +206,7 @@ export default function ScoutErrandDetailScreen() {
     });
     setSubmittingRequest(false);
 
-    if (error) { showAlert("Couldn't send request", error.message); return; }
+    if (error) { showAlert("Couldn't send request", getFriendlyErrorMessage(error)); return; }
     setFundsModalVisible(false);
     setRequestedAmount("");
     setRequestReason("");
@@ -221,7 +222,7 @@ export default function ScoutErrandDetailScreen() {
       .update({ scout_id: null, status: "open", accepted_at: null })
       .eq("id", errand.id);
     setUpdating(false);
-    if (error) { showAlert("Couldn't cancel", error.message); return; }
+    if (error) { showAlert("Couldn't cancel", getFriendlyErrorMessage(error)); return; }
     router.replace("/(scout)/home");
   }
 

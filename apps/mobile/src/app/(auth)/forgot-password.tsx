@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { IconMail, IconKey, IconLock, IconCheck } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { AuthScreenContainer, AuthTextInput, AuthButton, ErrorText } from "../../components/auth";
 import { routeAfterAuth } from "../../lib/route-after-auth";
 import { colors, fonts } from "../../theme";
@@ -41,7 +42,7 @@ export default function ForgotPasswordScreen() {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
     setLoading(false);
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     setCooldown(RESEND_COOLDOWN_SECONDS);
@@ -55,7 +56,7 @@ export default function ForgotPasswordScreen() {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
     setResending(false);
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     setDigits(Array(CODE_LENGTH).fill(""));
@@ -100,7 +101,7 @@ export default function ForgotPasswordScreen() {
     const { data, error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: "recovery" });
     setLoading(false);
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     if (!data.session) {
@@ -124,7 +125,7 @@ export default function ForgotPasswordScreen() {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setLoading(false);
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     setStep("done");

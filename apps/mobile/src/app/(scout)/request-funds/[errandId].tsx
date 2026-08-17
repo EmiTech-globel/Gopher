@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { IconArrowLeft, IconCamera, IconAlertCircle } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../lib/friendlyError";
 import { colors, fonts } from "../../../theme";
 
 export default function RequestFundsScreen() {
@@ -77,7 +78,7 @@ export default function RequestFundsScreen() {
 
       router.back();
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong. Try again.");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Something went wrong. Try again.");
     } finally {
       setSubmitting(false);
     }

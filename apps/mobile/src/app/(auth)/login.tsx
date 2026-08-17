@@ -11,6 +11,7 @@ import {
 import { router } from "expo-router";
 import { IconMail, IconLock } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { colors, fonts } from "../../theme";
 import { routeAfterAuth } from "../../lib/route-after-auth";
 
@@ -32,7 +33,7 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
 

@@ -145,6 +145,7 @@ export type Database = {
         Row: {
           created_at: string
           errand_id: string
+          evidence_photo_urls: string[] | null
           id: string
           opened_by: string
           reason: string
@@ -155,6 +156,7 @@ export type Database = {
         Insert: {
           created_at?: string
           errand_id: string
+          evidence_photo_urls?: string[] | null
           id?: string
           opened_by: string
           reason: string
@@ -165,6 +167,7 @@ export type Database = {
         Update: {
           created_at?: string
           errand_id?: string
+          evidence_photo_urls?: string[] | null
           id?: string
           opened_by?: string
           reason?: string

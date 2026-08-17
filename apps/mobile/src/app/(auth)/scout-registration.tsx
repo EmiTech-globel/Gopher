@@ -3,6 +3,7 @@ import { View, ActivityIndicator } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import {
   AuthScreenContainer,
   AuthTextInput,
@@ -100,7 +101,7 @@ export default function ScoutRegistrationScreen() {
     setLoading(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     if (!data.user) {
@@ -139,7 +140,7 @@ export default function ScoutRegistrationScreen() {
 
     setLoading(false);
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
 

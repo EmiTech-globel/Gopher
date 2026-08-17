@@ -3,6 +3,7 @@ import { View, Text, Image, Pressable, StyleSheet, ActivityIndicator } from "rea
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, router } from "expo-router";
 import { supabase } from "../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../lib/friendlyError";
 import { ErrorText } from "../../../components/auth";
 import { colors, fonts } from "../../../theme";
 
@@ -79,7 +80,7 @@ export default function ProofOfPurchaseScreen() {
 
       router.replace(`/(scout)/errand/${id}`);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }

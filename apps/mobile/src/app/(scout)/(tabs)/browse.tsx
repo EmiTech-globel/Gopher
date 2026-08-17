@@ -11,6 +11,7 @@ import {
 import { useFocusEffect, router } from "expo-router";
 import { IconShoppingBag, IconMapPin, IconLock } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../lib/friendlyError";
 import { AlertDialog } from "../../../components/AlertDialog";
 import { useAlertDialog } from "../../../lib/useAlertDialog";
 import { useActiveErrandCount } from "../../../lib/useActiveErrandCount";
@@ -100,7 +101,7 @@ export default function BrowseErrandsScreen() {
     setAcceptingId(null);
 
     if (error) {
-      showAlert("Couldn't accept errand", error.message);
+      showAlert("Couldn't accept errand", getFriendlyErrorMessage(error));
       return;
     }
     if (!data) {

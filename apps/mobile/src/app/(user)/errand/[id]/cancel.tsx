@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { IconArrowLeft, IconAlertTriangle } from "@tabler/icons-react-native";
 import { supabase } from "../../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../../lib/friendlyError";
 import { colors, fonts } from "../../../../theme";
 
 // Section 9: "2-3 min grace window after accept" — full refund, no
@@ -87,7 +88,7 @@ export default function CancelErrandScreen() {
     setCancelling(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
 

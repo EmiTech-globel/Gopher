@@ -6,6 +6,7 @@ import {
   IconStar, IconCheck, IconCash, IconPhone, IconAlertTriangle, IconPhoto,
 } from "@tabler/icons-react-native";
 import { supabase } from "../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../lib/friendlyError";
 import { ChatThread } from "../../../components/ChatThread";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EvidenceViewerModal } from "../../../components/EvidenceViewerModal";
@@ -223,7 +224,7 @@ export default function TrackErrandScreen() {
     setRespondingToRequest(false);
 
     if (error) {
-      showAlert("Couldn't decline", error.message);
+      showAlert("Couldn't decline", getFriendlyErrorMessage(error));
       return;
     }
     loadData();

@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import type { Session } from "@supabase/supabase-js";
 import { IconCheck } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { AuthButton } from "./AuthButton";
 import { ErrorText } from "./ErrorText";
 import { colors, fonts } from "../../theme";
@@ -80,7 +81,7 @@ export function EmailOtpStep({ email, onVerified, onContinue }: EmailOtpStepProp
     setVerifying(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     if (!data.session) {
@@ -101,7 +102,7 @@ export function EmailOtpStep({ email, onVerified, onContinue }: EmailOtpStepProp
     setResending(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     setDigits(Array(CODE_LENGTH).fill(""));

@@ -7,6 +7,7 @@ import { BuildingPicker } from "../../components/BuildingPicker";
 import { getSuggestedDeliveryFee } from "../../data/campus-zones";
 import { calculateProcessingFee } from "../../lib/paystack-fees";
 import { initiateErrandPayment } from "../../lib/paystack";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { colors, fonts } from "../../theme";
 
 const FEE_BUMP_INCREMENT = 50;
@@ -77,7 +78,7 @@ export default function PostErrandScreen() {
       // pick up the new errand once payment actually succeeds.
       router.replace("/(user)/home");
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Couldn't start payment. Try again.");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Couldn't start payment. Try again.");
     } finally {
       setSubmitting(false);
     }

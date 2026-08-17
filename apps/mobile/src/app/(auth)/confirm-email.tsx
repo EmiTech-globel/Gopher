@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import * as Linking from "expo-linking";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 
 function parseTokensFromUrl(url: string) {
   // Implicit flow (the JS SDK default for client-only apps) delivers
@@ -40,7 +41,7 @@ export default function ConfirmEmailScreen() {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(getFriendlyErrorMessage(error));
         return;
       }
 

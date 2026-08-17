@@ -6,6 +6,7 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { IconCheck, IconStarFilled, IconStar, IconAlertTriangle } from "@tabler/icons-react-native";
 import { supabase } from "../../../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../../../lib/friendlyError";
 import { AlertDialog } from "../../../../components/AlertDialog";
 import { releaseItemCostIfApplicable } from "../../../../lib/releaseItemCost";
 import { useAlertDialog } from "../../../../lib/useAlertDialog";
@@ -137,7 +138,7 @@ export default function DeliveryConfirmationScreen() {
       await supabase.from("errands").update({ status: "disputed" }).eq("id", errandId);
     }
     setSubmittingIssue(false);
-    if (error) { showAlert("Couldn't submit", error.message); return; }
+    if (error) { showAlert("Couldn't submit", getFriendlyErrorMessage(error)); return; }
     setIssueModalVisible(false);
     showAlert("Issue reported", "Our team will review this within 24 hours.", {
       onDismiss: () => router.replace("/(user)/home"),

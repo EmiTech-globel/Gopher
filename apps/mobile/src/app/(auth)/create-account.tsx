@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
+import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import {
   AuthScreenContainer,
   AuthTextInput,
@@ -57,7 +58,7 @@ export default function CreateAccountScreen() {
     setLoading(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error));
       return;
     }
     if (!data.user) {

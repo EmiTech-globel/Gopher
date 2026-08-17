@@ -7,6 +7,7 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { IconArrowLeft, IconCamera, IconX, IconAlertTriangle } from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
+import { getFriendlyErrorMessage } from "../lib/friendlyError";
 import { getSignedEvidenceUrl } from "../lib/signedUrl";
 import { EvidenceViewerModal } from "./EvidenceViewerModal";
 import { AlertDialog } from "./AlertDialog";
@@ -151,7 +152,7 @@ export function DisputeScreen({ errandBasePath }: { errandBasePath: string }) {
 
       router.back();
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Couldn't submit dispute. Try again.");
+      setErrorMessage(err instanceof Error ? getFriendlyErrorMessage(err) : "Couldn't submit dispute. Try again.");
     } finally {
       setSubmitting(false);
     }

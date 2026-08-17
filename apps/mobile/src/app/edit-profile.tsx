@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndic
 import { router } from "expo-router";
 import { IconArrowLeft, IconPencil, IconUser, IconPhone, IconBuilding } from "@tabler/icons-react-native";
 import { supabase } from "../lib/supabase";
+import { getFriendlyErrorMessage } from "../lib/friendlyError";
 import { pickAndUploadAvatar } from "../lib/uploadAvatar";
 import { AlertDialog } from "../components/AlertDialog";
 import { useAlertDialog } from "../lib/useAlertDialog";
@@ -74,7 +75,7 @@ export default function EditProfileScreen() {
     setSaving(false);
 
     if (error) {
-      showAlert("Couldn't save", error.message);
+      showAlert("Couldn't save", getFriendlyErrorMessage(error));
       return;
     }
     router.back();
