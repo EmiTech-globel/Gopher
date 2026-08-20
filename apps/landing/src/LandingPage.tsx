@@ -5,7 +5,7 @@ import "./LandingPage.css";
 
 const STEPS = [
   "Open the downloaded file (check your Downloads or Notifications).",
-  "If prompted, tap Settings and allow installs from this source — a one-time step for apps outside the Play Store.",
+  "If prompted, tap Settings and allow installs from this source, a one-time step for apps outside the Play Store.",
   "Tap Install, then open Gopher and sign up with your school email.",
 ];
 
@@ -17,11 +17,6 @@ export function LandingPage() {
   useEffect(() => {
     setPageUrl(window.location.href);
 
-    // Auto-triggers the APK download shortly after load, per spec
-    // Section 21 — the visible button below is the fallback for
-    // browsers that block this. A short delay avoids some browsers'
-    // more aggressive "blocked a download that happened without user
-    // action" filters that key off downloads firing instantly on load.
     if (isApkUrlConfigured()) {
       const timer = setTimeout(() => {
         linkRef.current?.click();
@@ -38,7 +33,7 @@ export function LandingPage() {
         Get <span className="accent-word">Gopher</span>
       </h1>
       <p className="tagline">
-        Post an errand or run one and earn — built by students, for students at PTI Effurun.
+        Post an errand or run one and earn,built by TrixStudio, for students at PTI Effurun.
       </p>
 
       <a ref={linkRef} className="download-btn" href={APK_DOWNLOAD_URL} download>
