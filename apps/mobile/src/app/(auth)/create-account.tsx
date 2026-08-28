@@ -24,6 +24,19 @@ export default function CreateAccountScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showOtp, setShowOtp] = useState(false);
 
+  function validatePassword(pw: string): string | null {
+    const missing = [];
+    if (pw.length < 8) missing.push("8+ characters");
+    if (!/[A-Z]/.test(pw)) missing.push("an uppercase letter");
+    if (!/[0-9]/.test(pw)) missing.push("a number");
+    if (!/[^A-Za-z0-9]/.test(pw)) missing.push("a symbol");
+    
+    if (missing.length > 0) {
+      return "Password must include: " + missing.join(", ") + ".";
+    }
+    return null;
+  }
+
   async function handleCreateAccount() {
     setErrorMessage(null);
 
@@ -35,8 +48,9 @@ export default function CreateAccountScreen() {
       setErrorMessage("Please enter your phone number.");
       return;
     }
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters.");
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setErrorMessage(pwError);
       return;
     }
     if (password !== confirmPassword) {
@@ -118,8 +132,8 @@ export default function CreateAccountScreen() {
       <AuthTextInput
         label="Password"
         icon={<IconLock size={14} color={colors.textSecondary} strokeWidth={1.75} />}
-        placeholder="At least 6 characters"
-        secureTextEntry
+        placeholder="8+ chars, uppercase, number & symbol"
+        isPassword
         value={password}
         onChangeText={setPassword}
       />
@@ -127,7 +141,7 @@ export default function CreateAccountScreen() {
         label="Confirm password"
         icon={<IconLock size={14} color={colors.textSecondary} strokeWidth={1.75} />}
         placeholder="Re-enter your password"
-        secureTextEntry
+        isPassword
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />

@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { supabase } from "./supabase";
 import { TERMS_VERSION } from "./terms";
+import { registerPushToken } from "./pushNotifications";
 
 /**
  * Decides where to send a user right after a session is established
@@ -49,6 +50,10 @@ export async function routeAfterAuth() {
   }
 
   if (scoutRow.verification_status === "approved") {
+    // Refresh the push token whenever an approved scout enters the app —
+    // covers reinstalls, token rotations, and the gap between submission
+    // and approval where the token may not have been stored yet.
+    registerPushToken().catch(() => {});
     router.replace("/(scout)/home");
     return;
   }

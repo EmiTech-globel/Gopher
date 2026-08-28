@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
-import { IconMail, IconLock } from "@tabler/icons-react-native";
+import { IconMail, IconLock, IconEye, IconEyeOff } from "@tabler/icons-react-native";
 import { supabase } from "../../lib/supabase";
 import { getFriendlyErrorMessage } from "../../lib/friendlyError";
 import { colors, fonts } from "../../theme";
@@ -18,6 +18,7 @@ import { routeAfterAuth } from "../../lib/route-after-auth";
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -75,14 +76,26 @@ export default function LoginScreen() {
           <IconLock size={20} color={colors.textSecondary} strokeWidth={1.75} />
           <Text style={styles.label}>Password</Text>
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password"
-          placeholderTextColor={colors.textSecondary + "80"}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[styles.input, { paddingRight: 48 }]}
+            placeholder="Enter your password"
+            placeholderTextColor={colors.textSecondary + "80"}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <Pressable
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <IconEyeOff size={20} color={colors.textSecondary} />
+            ) : (
+              <IconEye size={20} color={colors.textSecondary} />
+            )}
+          </Pressable>
+        </View>
       </View>
 
       {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
@@ -170,6 +183,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
+  },
+  inputContainer: {
+    justifyContent: "center",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 16,
+    padding: 4,
   },
   error: {
     color: colors.error,

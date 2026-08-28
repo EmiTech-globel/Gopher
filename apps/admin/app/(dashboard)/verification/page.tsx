@@ -1,6 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { VerificationActions } from "@/components/verification-actions";
+import { VerificationRealtimeWatcher } from "@/components/verification-realtime-watcher";
 
 interface PendingApplicant {
   profile_id: string;
@@ -42,6 +43,8 @@ export default async function VerificationPage() {
 
   return (
     <div>
+      {/* Live-updates the queue whenever a new scout submits for review */}
+      <VerificationRealtimeWatcher />
       <h1 className="mb-1 text-xl font-semibold text-foreground">Verification queue</h1>
       <p className="mb-6 text-sm text-muted">
         Scout applications awaiting review. Turnaround target: 24–48 hours.
