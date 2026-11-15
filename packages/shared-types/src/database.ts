@@ -346,38 +346,6 @@ export type Database = {
           },
         ]
       }
-      push_tokens: {
-        Row: {
-          id: string
-          user_id: string
-          token: string
-          platform: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          token: string
-          platform: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          token?: string
-          platform?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "push_tokens_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       payout_batch_items: {
         Row: {
           amount: number
@@ -501,6 +469,8 @@ export type Database = {
           id: string
           phone: string | null
           reveal_phone_by_default: boolean
+          terms_accepted_at: string | null
+          terms_version: string | null
         }
         Insert: {
           access_revoked_at?: string | null
@@ -513,6 +483,8 @@ export type Database = {
           id: string
           phone?: string | null
           reveal_phone_by_default?: boolean
+          terms_accepted_at?: string | null
+          terms_version?: string | null
         }
         Update: {
           access_revoked_at?: string | null
@@ -525,6 +497,32 @@ export type Database = {
           id?: string
           phone?: string | null
           reveal_phone_by_default?: boolean
+          terms_accepted_at?: string | null
+          terms_version?: string | null
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -759,6 +757,10 @@ export type Database = {
         Returns: string
       }
       is_admin: { Args: never; Returns: boolean }
+      register_push_token: {
+        Args: { p_platform: string; p_token: string }
+        Returns: undefined
+      }
       reveal_my_phone: {
         Args: { target_errand_id: string }
         Returns: undefined
@@ -790,6 +792,10 @@ export type Database = {
         | "balance_request_created"
         | "balance_request_approved"
         | "proof_submitted"
+        | "verification_approved"
+        | "verification_rejected"
+        | "payout_sent"
+        | "scout_submitted"
       payout_batch_status: "pending" | "paid"
       transaction_type:
         | "payment_in"
@@ -814,12 +820,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -843,11 +849,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -868,11 +874,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -893,11 +899,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -910,11 +916,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -956,6 +962,10 @@ export const Constants = {
         "balance_request_created",
         "balance_request_approved",
         "proof_submitted",
+        "verification_approved",
+        "verification_rejected",
+        "payout_sent",
+        "scout_submitted",
       ],
       payout_batch_status: ["pending", "paid"],
       transaction_type: [

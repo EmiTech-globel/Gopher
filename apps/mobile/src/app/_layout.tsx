@@ -15,8 +15,10 @@ import {
   Manrope_500Medium,
   Manrope_600SemiBold,
 } from "@expo-google-fonts/manrope";
+
 import { supabase } from "../lib/supabase";
 import {
+  ensureAndroidChannel,
   requestNotificationPermission,
   registerPushToken,
   setupPushHandlers,
@@ -50,24 +52,19 @@ export default function RootLayout() {
     let cleanup: (() => void) | undefined;
 
     async function initPush() {
-      const alreadyAsked = await AsyncStorage.getItem(PERMISSION_ASKED_KEY);
-      let permissionGranted = alreadyAsked === "granted";
+      // The channel must exist before the permission prompt and before
+      // any push arrives on Android.
+      await ensureAndroidChannel();
 
-      if (!alreadyAsked) {
-        permissionGranted = await requestNotificationPermission();
-        await AsyncStorage.setItem(PERMISSION_ASKED_KEY, permissionGranted ? "granted" : "denied");
-      }
-
-      // Only register a push token when permission is actually granted.
-      if (permissionGranted) {
-        await registerPushToken();
-      }
-
+      // Attach the tap handler first so a tap is never missed while the
+      // permission and registration steps below are still awaiting.
       cleanup = setupPushHandlers(async (data) => {
         const errandId = data?.errandId as string | undefined;
         if (!errandId) return;
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return;
 
         const { data: scoutRow } = await supabase
@@ -76,15 +73,37 @@ export default function RootLayout() {
           .eq("profile_id", user.id)
           .maybeSingle();
 
-        const basePath = scoutRow?.verification_status === "approved"
-          ? "/(scout)/errand"
-          : "/(user)/errand";
+        const basePath =
+          scoutRow?.verification_status === "approved"
+            ? "/(scout)/errand"
+            : "/(user)/errand";
 
         router.push(`${basePath}/${errandId}` as any);
       });
+
+      const alreadyAsked = await AsyncStorage.getItem(PERMISSION_ASKED_KEY);
+      let permissionGranted = alreadyAsked === "granted";
+
+      if (!alreadyAsked) {
+        permissionGranted = await requestNotificationPermission();
+        await AsyncStorage.setItem(
+          PERMISSION_ASKED_KEY,
+          permissionGranted ? "granted" : "denied",
+        );
+      }
+
+      // Only register a push token when permission is actually granted.
+      if (permissionGranted) {
+        try {
+          await registerPushToken();
+        } catch (e) {
+          console.warn("Push token registration failed", e);
+        }
+      }
     }
 
-    initPush();
+    initPush().catch((e) => console.warn("Push setup failed", e));
+
     return () => cleanup?.();
   }, [appReady]);
 
