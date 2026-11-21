@@ -17,9 +17,16 @@ img { max-width: 100%; }
 .gap { margin-top: 72px; }
 
 /* header */
-.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; padding-bottom: 22px; position: relative; }
-.brand { font: 700 26px Ubuntu, sans-serif; color: var(--s-deep); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; padding-bottom: 22px; position: sticky; top: 0; z-index: 50; background: rgba(247, 239, 238, 0.94); backdrop-filter: blur(12px); }
+.brand { display: inline-flex; align-items: center; gap: 8px; font: 700 26px Ubuntu, sans-serif; color: var(--s-deep); }
+.brand-logo { display: block; width: 36px; height: 36px; object-fit: cover; border-radius: 50%; }
 .nav-links { display: flex; gap: 28px; font-weight: 600; font-size: 15px; }
+.nav-links a, .menu-list a { position: relative; transition: color 0.5s ease-in-out; }
+.nav-links a::after, .menu-list a::after { content: ""; position: absolute; left: 0; bottom: 4px; width: 70%; height: 3px; border-radius: 999px; background: var(--s-plum); transform: scaleX(0); transform-origin: left center; transition: transform 0.5s ease-in-out; }
+.nav-links a::after { bottom: -8px; }
+.nav-links a.active, .menu-list a.active { color: var(--s-deep); }
+.nav-links a.active::after, .nav-links a:hover::after, .menu-list a.active::after, .menu-list a:hover::after { transform: scaleX(1); }
+.menu-list a:hover { color: var(--s-deep); }
 .nav-right { display: flex; align-items: center; gap: 12px; }
 .menu { display: none; }
 .menu summary { cursor: pointer; list-style: none; width: 46px; height: 46px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(46, 18, 75, 0.08); display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 6px; padding-right: 12px; }
@@ -31,7 +38,17 @@ img { max-width: 100%; }
 .menu summary::-webkit-details-marker { display: none; }
 .menu-list { position: absolute; right: 24px; top: 72px; z-index: 5; background: #fff; border-radius: 18px; padding: 10px 6px; box-shadow: 0 18px 40px rgba(46, 18, 75, 0.18); display: flex; flex-direction: column; min-width: 210px; font-weight: 600; }
 .menu-list a { padding: 10px 16px; }
-@media (max-width: 700px) { .nav-links { display: none; } .menu { display: block; } }
+@media (max-width: 700px) {
+  .nav-links { display: none; }
+  .menu { display: block; }
+  .nav > .brand .brand-name { display: none; }
+  .menu-list a::after {
+    left: 16px;
+    bottom: 6px;
+    width: 70px;
+    height: 2px;
+  }
+}
 
 /* buttons */
 .btn { display: inline-flex; align-items: center; gap: 10px; background: var(--s-plum); color: #fff; padding: 17px 30px; border-radius: 14px; font-weight: 700; font-size: 16px; }
@@ -79,10 +96,15 @@ img { max-width: 100%; }
 
 /* footer */
 .footer { margin-top: 72px; padding-top: 32px; padding-bottom: 48px; border-top: 1px solid var(--s-line); display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; font-size: 14px; color: var(--s-muted); }
-.footer .brand { font-size: 20px; display: block; margin-bottom: 8px; }
+.footer .brand { font-size: 20px; display: flex; width: fit-content; align-items: center; gap: 8px; margin-bottom: 8px; }
+.footer .brand-logo { width: 30px; height: 30px; }
 .footer .col { display: flex; flex-direction: column; gap: 8px; }
 .footer b { color: var(--s-deep); }
 .footer .copy { align-self: flex-end; }
+
+.scroll-top { position: fixed; right: 24px; bottom: 24px; z-index: 60; width: 48px; height: 48px; border: 0; border-radius: 50%; background: var(--s-plum); color: #fff; box-shadow: 0 8px 18px rgba(46, 18, 75, 0.22); cursor: pointer; display: grid; place-items: center; opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
+.scroll-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.scroll-top:hover { background: var(--s-deep); box-shadow: 0 12px 28px rgba(46, 18, 75, 0.42); transform: translateY(-3px); }
 
 /* download page */
 .dl { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 56px; padding-top: 40px; }

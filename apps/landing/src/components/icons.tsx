@@ -25,3 +25,11 @@ export function ShieldIcon() {
     </svg>
   );
 }
+
+export function ArrowUpIcon() {
+  return (
+    <svg {...base} width={22} height={22} strokeWidth={2.25}>
+      <path d="M12 19V5M5 12l7-7l7 7" />
+    </svg>
+  );
+}

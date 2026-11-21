@@ -1,0 +1,1 @@
+import{j as c}from"./tokens-Z9PJ2ZGX.js";function a({url:o,size:t=300,className:r}){const e=`https://api.qrserver.com/v1/create-qr-code/?size=${t}x${t}&data=${encodeURIComponent(o)}`;return c.jsx("img",{className:r,src:e,alt:"QR code",width:t,height:t})}export{a as Q};

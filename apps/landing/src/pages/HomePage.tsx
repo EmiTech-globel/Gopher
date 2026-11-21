@@ -25,7 +25,7 @@ const TRUST = [
 export function HomePage() {
   return (
     <>
-      <section className="wrap hero">
+      <section id="home" className="wrap hero">
         <div className="hero-text">
           <h1>Your campus, delivered by students.</h1>
           <p className="lead">
