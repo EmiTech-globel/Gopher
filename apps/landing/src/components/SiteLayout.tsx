@@ -5,7 +5,7 @@ import { FOOTER_LINKS, NAV_LINKS, SUPPORT_EMAIL, SUPPORT_PHONE } from "../site";
 import { ArrowUpIcon } from "./icons";
 
 export function SiteLayout({ children }: { children: ReactNode }) {
-  const [activeHref, setActiveHref] = useState(() => window.location.pathname);
+  const [activeHref, setActiveHref] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {

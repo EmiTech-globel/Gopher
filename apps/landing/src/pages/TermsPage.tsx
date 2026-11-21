@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ContactLine, LegalPage, type LegalSection } from "../components/LegalPage";
 
 const OVERVIEW: LegalSection[] = [
@@ -39,10 +39,11 @@ const TABS = [
 ];
 
 export function TermsPage() {
-  const [active, setActive] = useState(() => {
-    const hash = typeof window === "undefined" ? "" : window.location.hash.slice(1);
-    return TABS.some((t) => t.id === hash) ? hash : "overview";
-  });
+  const [active, setActive] = useState("overview");
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (TABS.some((t) => t.id === hash)) setActive(hash);
+  }, []);
   const tab = TABS.find((t) => t.id === active) ?? TABS[0];
 
   return (
