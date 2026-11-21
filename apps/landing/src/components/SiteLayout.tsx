@@ -20,7 +20,10 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             Download
           </a>
           <details className="menu">
-            <summary>Menu</summary>
+            <summary aria-label="Menu">
+              <span />
+              <span />
+            </summary>
             <div className="menu-list">
               {NAV_LINKS.map((l) => (
                 <a key={l.href} href={l.href}>
