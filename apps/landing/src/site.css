@@ -41,7 +41,7 @@ img { max-width: 100%; }
 @media (max-width: 700px) {
   .nav-links { display: none; }
   .menu { display: block; }
-  .nav > .brand .brand-name { display: none; }
+  .nav > .brand .brand-name { font-size: 20px; }
   .menu-list a::after {
     left: 16px;
     bottom: 6px;
