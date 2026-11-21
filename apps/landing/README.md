@@ -7,33 +7,40 @@ have fundamentally different needs and shouldn't share a bundle.
 
 ## Structure
 
+Multi-page static site. Every `*.html` file in this folder is its own
+page (Vite builds them all, see `vite.config.ts`), and each page has a
+tiny entry file in `src/entries/` that mounts a page component inside
+the shared layout. The flyer is separate: it has its own print-only CSS
+and does not use the site layout.
+
 ```
 apps/landing/
-├── index.html / flyer.html   Vite entry points (thin HTML shells)
-├── src/
-│   ├── LandingPage.tsx        The actual download page
-│   ├── FlyerPage.tsx          Print-optimized campus poster
-│   ├── QrCode.tsx             Shared — generates a QR client-side
-│   ├── config.ts              APK_DOWNLOAD_URL lives here
-│   ├── tokens.css             Brand color variables
-│   └── landing-main.tsx /
-│       flyer-main.tsx         React mount points
+├── index.html, download.html     Page shells (one per page)
+├── flyer.html                    Printable campus poster
+├── public/img/                   Photos and the app screenshot
+└── src/
+    ├── entries/                  One file per page: mount(<Page />)
+    ├── pages/                    HomePage, DownloadPage
+    ├── components/               SiteLayout (nav + footer), icons
+    ├── site.ts                   Nav links, footer links, support contact
+    ├── site.css                  Site styles (light theme)
+    ├── config.ts                 APK_DOWNLOAD_URL lives here
+    ├── QrCode.tsx                QR image used on the download page
+    └── FlyerPage.tsx / tokens.css  Flyer page and brand colour variables
 ```
+
+To add a page: add `<name>.html`, `src/entries/<name>.tsx` and a page
+component, then link it from `src/site.ts`.
 
 ## Pages
 
-- **Landing page** — auto-triggers the APK download shortly after
-  load, with a visible "Download for Android" button as the fallback
-  for browsers that block that. Install-from-unknown-sources steps,
-  and a QR code that encodes the landing page's own URL (not the raw
-  APK link) — so scanning it gets the fallback button and instructions
-  too, not just a bare file some browsers flag as an unrecognized
-  download with no context.
-- **Flyer** — print-optimized poster. Light background (dark wastes
-  ink and prints poorly on typical printers, unlike the brand-dark
-  theme used everywhere else in this project), large QR, minimal
-  text, one-page A4 layout. Its QR points at the landing page, not
-  itself.
+- **Home** (`/`) — what Gopher is, how it works, trust and safety.
+- **Download** (`/download`) — auto-triggers the APK download shortly
+  after load (once `APK_DOWNLOAD_URL` is a real link), with a visible
+  button as the fallback, install steps and a QR code that encodes the
+  page's own URL.
+- **Flyer** (`/flyer`) — print-optimized poster; its QR points at the
+  download page.
 
 ## One thing you MUST fill in before deploying
 

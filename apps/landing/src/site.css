@@ -78,3 +78,18 @@ img { max-width: 100%; }
 .footer .col { display: flex; flex-direction: column; gap: 8px; }
 .footer b { color: var(--s-deep); }
 .footer .copy { align-self: flex-end; }
+
+/* download page */
+.dl { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 56px; padding-top: 40px; }
+.dl-main { flex: 1 1 440px; }
+.dl h1 { font-size: clamp(36px, 5vw, 52px); margin-bottom: 16px; }
+.dl h2 { font-size: 26px; margin: 0 0 14px; }
+.status { min-height: 1.6em; margin-top: 12px; }
+.pills { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 36px; }
+.pill { padding: 9px 18px; border-radius: 999px; background: #fff; color: var(--s-muted); font-size: 13px; font-weight: 600; }
+.install { display: flex; flex-direction: column; gap: 12px; list-style: none; }
+.install li { background: #fff; border-radius: 16px; padding: 16px 20px; }
+.install b { color: var(--s-deep); }
+.dl-side { flex: 1 1 320px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
+.qr-box { text-align: center; }
+.qr-box img { display: block; margin: 0 auto 8px; border-radius: 20px; background: #fff; padding: 10px; }
