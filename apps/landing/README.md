@@ -39,6 +39,7 @@ component, then link it from `src/site.ts`.
   after load (once `APK_DOWNLOAD_URL` is a real link), with a visible
   button as the fallback, install steps and a QR code that encodes the
   page's own URL.
+- **Become a scout** (`/scouts`), **FAQ** (`/faq`) and **Contact** (`/contact`) — marketing pages. Set the support email, WhatsApp and hours in `src/site.ts`.
 - **Flyer** (`/flyer`) — print-optimized poster; its QR points at the
   download page.
 

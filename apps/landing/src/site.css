@@ -98,3 +98,40 @@ img { max-width: 100%; }
 .dl-side { flex: 1 1 320px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
 .qr-box { text-align: center; }
 .qr-box img { display: block; margin: 0 auto 8px; border-radius: 20px; background: #fff; padding: 10px; }
+
+/* inner pages */
+.page-title { font-size: clamp(36px, 5vw, 52px); margin-bottom: 14px; }
+.section { padding-top: 72px; }
+.section > h2 { font-size: clamp(28px, 4vw, 36px); margin-bottom: 24px; }
+.feature-img { width: 100%; max-width: 480px; height: 460px; object-fit: cover; border-radius: 28px; }
+.cards3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.note { margin-top: 20px; font-size: 15px; color: var(--s-muted); }
+.tiers { background: #fff; border-radius: 20px; overflow: hidden; }
+.tier-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; padding: 16px 20px; border-top: 1px solid #efdfe0; font-size: 14px; }
+.tier-row.head { background: var(--s-plum); color: #fff; font-weight: 700; font-size: 13px; border-top: 0; }
+@media (max-width: 600px) {
+  .tier-row { grid-template-columns: 1fr; }
+  .tier-row.head { display: none; }
+  .tier-row span::before { content: attr(data-label) ": "; font-weight: 700; color: var(--s-deep); }
+}
+.pay { display: flex; flex-direction: column; gap: 14px; }
+.pay-item { background: #fff; border-radius: 16px; padding: 18px 22px; }
+.pay-item h3 { font-size: 19px; }
+.pay-item p { margin-top: 4px; font-size: 15px; }
+.chip { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--s-plum); color: #fff; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+.cta.cta-plum { background: linear-gradient(135deg, var(--s-plum), var(--s-deep)); }
+.faq { display: flex; flex-direction: column; gap: 12px; max-width: 780px; padding-top: 40px; }
+.faq details { background: #fff; border-radius: 16px; padding: 20px 24px; }
+.faq summary { cursor: pointer; font-weight: 700; font-size: 17px; color: var(--s-deep); }
+.faq p { margin-top: 12px; font-size: 15px; }
+.faq .lead { margin-bottom: 16px; }
+.contact { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; margin-top: 32px; }
+.contact-cards { flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; }
+.info { background: #fff; border-radius: 20px; padding: 22px 26px; }
+.info .label { font-size: 13px; font-weight: 700; color: var(--s-muted); letter-spacing: 0.06em; }
+.info .value { font-weight: 600; color: var(--s-deep); margin-top: 4px; }
+.form { flex: 1 1 380px; background: #fff; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+.form h2 { font-size: 26px; margin-bottom: 4px; }
+.form input, .form textarea { border: 1.5px solid var(--s-line); border-radius: 12px; padding: 14px 16px; font: inherit; color: var(--s-ink); background: #fff; }
+.form textarea { min-height: 130px; resize: vertical; }
+.form button { border: 0; cursor: pointer; justify-content: center; }

@@ -95,7 +95,7 @@ export function HomePage() {
             Get verified once with your student ID, then pick errands from the open pool whenever you
             are free. Every delivery earns a fee.
           </p>
-          <a className="text-link" href="/download">
+          <a className="text-link" href="/scouts">
             Become a scout
           </a>
         </div>
