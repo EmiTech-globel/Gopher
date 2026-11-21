@@ -157,3 +157,21 @@ img { max-width: 100%; }
 .form input, .form textarea { border: 1.5px solid var(--s-line); border-radius: 12px; padding: 14px 16px; font: inherit; color: var(--s-ink); background: #fff; }
 .form textarea { min-height: 130px; resize: vertical; }
 .form button { border: 0; cursor: pointer; justify-content: center; }
+
+/* legal pages */
+.legal { max-width: 828px; padding-top: 40px; }
+.legal .muted { margin-bottom: 20px; }
+.legal .lead { max-width: none; margin-bottom: 24px; }
+.legal h2 { font-size: 24px; margin: 36px 0 8px; }
+.legal section p { font-size: 16px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.tab { border: 0; cursor: pointer; padding: 10px 20px; border-radius: 999px; font: 700 14px Manrope, sans-serif; background: #fff; color: var(--s-plum); }
+.tab[aria-pressed="true"] { background: var(--s-plum); color: #fff; }
+.refund-table { background: #fff; border-radius: 20px; overflow: hidden; margin: 8px 0; }
+.refund-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; padding: 16px 20px; border-top: 1px solid #efdfe0; font-size: 14px; }
+.refund-row.head { background: var(--s-plum); color: #fff; font-weight: 700; font-size: 13px; border-top: 0; }
+@media (max-width: 600px) {
+  .refund-row { grid-template-columns: 1fr; }
+  .refund-row.head { display: none; }
+  .refund-row span::before { content: attr(data-label) ": "; font-weight: 700; color: var(--s-deep); }
+}

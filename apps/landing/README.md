@@ -40,6 +40,7 @@ component, then link it from `src/site.ts`.
   button as the fallback, install steps and a QR code that encodes the
   page's own URL.
 - **Become a scout** (`/scouts`), **FAQ** (`/faq`) and **Contact** (`/contact`) — marketing pages. Set the support email, WhatsApp and hours in `src/site.ts`.
+- **Terms** (`/terms`), **Privacy** (`/privacy`), **Cancellation and Refund** (`/refunds`) and **Delete account** (`/delete-account`) — draft legal pages built from the product spec. Have them reviewed before launch, then set `LEGAL_UPDATED` and `DELETION_DAYS` in `src/legal.ts`.
 - **Flyer** (`/flyer`) — print-optimized poster; its QR points at the
   download page.
 

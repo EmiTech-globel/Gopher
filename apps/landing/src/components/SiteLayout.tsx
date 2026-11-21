@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { LEGAL_LINKS } from "../legal";
 import { FOOTER_LINKS, NAV_LINKS, SUPPORT_EMAIL, SUPPORT_PHONE } from "../site";
 import { ArrowUpIcon } from "./icons";
 
@@ -120,6 +121,14 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         <div className="col">
           <b>Gopher</b>
           {FOOTER_LINKS.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </div>
+        <div className="col">
+          <b>Legal</b>
+          {LEGAL_LINKS.map((l) => (
             <a key={l.href} href={l.href}>
               {l.label}
             </a>
